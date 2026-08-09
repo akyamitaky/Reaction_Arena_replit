@@ -7,7 +7,7 @@ export default function ReflexGame({ addScore, nextRound }: GameContext) {
   const [phase, setPhase] = useState<Phase>('waiting');
   const [reactionTime, setReactionTime] = useState(0);
   const goTime = useRef(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     setPhase('ready');

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Copy, Crown, Users, Loader2, ArrowLeft, Zap } from 'lucide-react';
-import { getRoomState, joinRoom, startArena } from 'zite-endpoints-sdk';
+import { getRoomState, joinRoom, startArena, subscribeToRoom } from '@/lib/arenaApi';
 import { toast } from 'sonner';
 
 export default function LobbyPage() {
@@ -38,7 +38,7 @@ export default function LobbyPage() {
     doJoin();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Poll room state
+  // Load once, then keep the lobby synchronized with Supabase Realtime.
   const pollRoom = useCallback(async () => {
     if (!roomId) return;
     try {
@@ -58,8 +58,8 @@ export default function LobbyPage() {
 
   useEffect(() => {
     pollRoom();
-    const interval = setInterval(pollRoom, 2000);
-    return () => clearInterval(interval);
+    if (!roomId) return;
+    return subscribeToRoom(roomId, pollRoom);
   }, [pollRoom]);
 
   const handleCopyCode = () => {

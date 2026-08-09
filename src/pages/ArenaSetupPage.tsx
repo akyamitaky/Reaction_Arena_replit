@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { ArrowLeft, Swords, Zap, Loader2 } from 'lucide-react';
-import { createRoom } from 'zite-endpoints-sdk';
+import { createRoom } from '@/lib/arenaApi';
 import { toast } from 'sonner';
 
 const PRESETS = [

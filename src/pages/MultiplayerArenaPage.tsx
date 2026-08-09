@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getGameMode } from '@/lib/gameConfig';
 import GameShell from '@/components/GameShell';
 import MultiplayerInterstitial from '@/components/MultiplayerInterstitial';
-import { getRoomState, submitScore, advanceGame } from 'zite-endpoints-sdk';
+import { getRoomState, submitScore, advanceGame, subscribeToRoom } from '@/lib/arenaApi';
 import { GameContext } from '@/components/GameShell';
 
 import ColorGame from '@/components/games/ColorGame';
@@ -69,12 +69,14 @@ export default function MultiplayerArenaPage() {
   const [advancing, setAdvancing] = useState(false);
   const submittedRef = useRef(false);
 
-  // Poll when waiting or between games
+  // Load when entering a waiting phase, then use Supabase Realtime for updates.
   useEffect(() => {
     if (phase !== 'waiting' && phase !== 'between') return;
-    const poll = async () => {
+    let disposed = false;
+    const sync = async () => {
       try {
         const data = await getRoomState({ roomId });
+        if (disposed) return;
         setPlayers(data.players);
         setGameIDs(data.room.gameIDs);
         setIsHost(data.players.find(p => p.id === playerId)?.isHost || false);
@@ -103,9 +105,13 @@ export default function MultiplayerArenaPage() {
         }
       } catch {}
     };
-    poll();
-    const interval = setInterval(poll, 2000);
-    return () => clearInterval(interval);
+    void sync();
+    if (!roomId) return () => { disposed = true; };
+    const unsubscribe = subscribeToRoom(roomId, sync);
+    return () => {
+      disposed = true;
+      unsubscribe();
+    };
   }, [phase, roomId, playerId]);
 
   // Navigate to results when finished

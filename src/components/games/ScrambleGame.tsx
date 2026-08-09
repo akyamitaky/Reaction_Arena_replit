@@ -5,7 +5,7 @@ import { GameContext } from '@/components/GameShell';
 
 const WORDS = ['planet', 'rocket', 'garden', 'silver', 'monkey', 'castle', 'dragon', 'sunset', 'forest', 'bridge', 'puzzle', 'bottle', 'candle', 'dinner', 'engine', 'flower', 'guitar', 'hammer', 'island', 'jungle', 'kitten', 'laptop', 'mirror', 'needle', 'orange'];
 
-function scramble(word: string) {
+function scramble(word: string): string {
   const arr = word.split('');
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

@@ -1,9 +1,0 @@
-{
-  "integrations": {
-    "reaction-arena": {
-      "type": "databases",
-      "connectionId": null,
-      "base": "ReactionArena"
-    }
-  }
-}

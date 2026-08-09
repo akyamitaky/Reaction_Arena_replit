@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Trophy, Home, Crown, Medal } from 'lucide-react';
-import { getRoomState } from 'zite-endpoints-sdk';
+import { getRoomState } from '@/lib/arenaApi';
 import { getGameMode } from '@/lib/gameConfig';
 
 interface PlayerResult {
