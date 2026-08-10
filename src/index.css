@@ -1,5 +1,5 @@
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -14,35 +14,35 @@
        ============================================ */
 
     /* Core colors */
-    --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 215 20.2% 65.1%;
+    --background: 220 28% 8%;
+    --foreground: 210 30% 94%;
+    --muted: 220 20% 15%;
+    --muted-foreground: 218 14% 64%;
+    --popover: 222 25% 11%;
+    --popover-foreground: 210 30% 94%;
+    --border: 220 18% 22%;
+    --input: 220 18% 24%;
+    --card: 222 25% 12%;
+    --card-foreground: 210 30% 94%;
+    --primary: 166 72% 48%;
+    --primary-foreground: 220 30% 8%;
+    --secondary: 220 22% 17%;
+    --secondary-foreground: 210 30% 94%;
+    --accent: 34 92% 61%;
+    --accent-foreground: 220 30% 8%;
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 210 30% 94%;
+    --ring: 166 72% 48%;
 
     /* Border radius */
-    --radius: 0.5rem;
+    --radius: 0.8rem;
 
     /* Chart colors */
-    --chart-1: 221 83% 53%;
-    --chart-2: 212 95% 68%;
-    --chart-3: 216 92% 60%;
-    --chart-4: 210 98% 78%;
-    --chart-5: 212 97% 87%;
+    --chart-1: 166 72% 48%;
+    --chart-2: 34 92% 61%;
+    --chart-3: 191 74% 57%;
+    --chart-4: 278 68% 68%;
+    --chart-5: 9 82% 66%;
 
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
@@ -55,8 +55,9 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* Font families */
-    --font-sans: 'Inter', 'Helvetica Neue', sans-serif;
-    --font-mono: 'Courier New', monospace;
+    --font-sans: 'DM Sans', sans-serif;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono: 'Space Grotesk', monospace;
 
     /* Shadow configuration */
     --shadow-x: 0px;
@@ -64,7 +65,7 @@
     --shadow-blur: 4px;
     --shadow-spread: 0px;
     --shadow-opacity: 0.2;
-    --shadow-color: #000000;
+    --shadow-color: #061c1b;
 
     /* Computed shadows (derived from params above) */
     --shadow-2xs: var(--shadow-x) var(--shadow-y) color-mix(in srgb, var(--shadow-color) calc(var(--shadow-opacity) * 100%), transparent);
@@ -81,6 +82,26 @@
        Custom CSS can be added below this line
        ============================================ */
   }
+  .light {
+    --background: 210 35% 96%;
+    --foreground: 220 28% 12%;
+    --muted: 210 28% 90%;
+    --muted-foreground: 218 14% 42%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 28% 12%;
+    --border: 210 21% 84%;
+    --input: 210 21% 84%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 28% 12%;
+    --primary: 166 68% 34%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 28% 91%;
+    --secondary-foreground: 220 28% 12%;
+    --accent: 34 90% 48%;
+    --accent-foreground: 220 28% 12%;
+    --ring: 166 68% 34%;
+    --shadow-color: #0f3d3a;
+  }
 }
 
 @layer base {
@@ -89,5 +110,13 @@
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    background-image: radial-gradient(circle at 10% 0%, hsl(var(--primary) / .08), transparent 26rem), radial-gradient(circle at 90% 12%, hsl(var(--accent) / .07), transparent 22rem);
+    min-height: 100dvh;
   }
+  h1, h2, h3, h4 { font-family: var(--font-display); }
+  button, a, input { transition: color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }

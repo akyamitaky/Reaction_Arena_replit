@@ -3,11 +3,11 @@ import { gameModes } from '@/lib/gameConfig';
 
 export default function GameModeGrid() {
   return (
-    <div className="mt-8 grid grid-cols-5 gap-2">
+    <div className="mt-5 grid grid-cols-5 gap-2">
       {gameModes.map((item, i) => (
         <motion.div
           key={item.id}
-          className="flex flex-col items-center gap-1 p-3 rounded-xl bg-secondary/50"
+          className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border border-border/50 bg-secondary/35 hover:bg-secondary hover:border-primary/30"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 + i * 0.03 }}
