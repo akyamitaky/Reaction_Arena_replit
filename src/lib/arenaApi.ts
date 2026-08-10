@@ -54,7 +54,13 @@ type PlayerRow = {
 };
 
 function asError(error: { message?: string } | null) {
-  return new Error(error?.message || 'Something went wrong. Please try again.');
+  const message = error?.message || '';
+  if (message.includes('Could not find the function public.create_room') || message.includes('schema cache')) {
+    return new Error(
+      'Multiplayer is almost configured. Run supabase/migrations/20260809000000_reaction_arena.sql in your Supabase SQL Editor, then try creating the room again.',
+    );
+  }
+  return new Error(message || 'Something went wrong. Please try again.');
 }
 
 function mapRoom(row: RoomRow): Room {
