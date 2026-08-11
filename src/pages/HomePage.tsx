@@ -103,7 +103,6 @@ export default function HomePage() {
           </CardContent>
         </Card>
 
-        <GameModeGrid />
         <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-secondary/30 px-5 py-4 mt-5"><div><p className="text-xs uppercase tracking-widest text-muted-foreground">Momentum</p><p className="font-display font-bold mt-1">Build your streak</p></div><div className="text-right"><p className="text-2xl font-display font-bold text-primary">26</p><p className="text-[11px] text-muted-foreground">ways to play</p></div></div>
         <GameModeGrid />
         </motion.div>

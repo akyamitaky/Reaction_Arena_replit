@@ -28,7 +28,7 @@ export default function ArenaResultsPage() {
     const fetch = async () => {
       try {
         const data = await getRoomState({ roomId });
-        setPlayers(data.players.sort((a, b) => b.totalScore - a.totalScore));
+        setPlayers([...data.players].sort((a, b) => b.totalScore - a.totalScore || a.name.localeCompare(b.name)));
         setGameIDs(data.room.gameIDs);
       } catch {}
       setLoading(false);

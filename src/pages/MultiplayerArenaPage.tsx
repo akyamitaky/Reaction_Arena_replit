@@ -5,6 +5,7 @@ import GameShell from '@/components/GameShell';
 import MultiplayerInterstitial from '@/components/MultiplayerInterstitial';
 import { getRoomState, submitScore, advanceGame, subscribeToRoom } from '@/lib/arenaApi';
 import { GameContext } from '@/components/GameShell';
+import { toast } from 'sonner';
 
 import ColorGame from '@/components/games/ColorGame';
 import MathGame from '@/components/games/MathGame';
@@ -69,9 +70,10 @@ export default function MultiplayerArenaPage() {
   const [advancing, setAdvancing] = useState(false);
   const submittedRef = useRef(false);
 
-  // Load when entering a waiting phase, then use Supabase Realtime for updates.
+  // Hydrate immediately and keep the entire arena synchronized. Realtime is
+  // supplemented by a light polling fallback because browser/network sleep
+  // can drop a websocket event.
   useEffect(() => {
-    if (phase !== 'waiting' && phase !== 'between') return;
     let disposed = false;
     const sync = async () => {
       try {
@@ -79,28 +81,23 @@ export default function MultiplayerArenaPage() {
         if (disposed) return;
         setPlayers(data.players);
         setGameIDs(data.room.gameIDs);
+        setCurrentIdx(data.room.currentGameIndex);
         setIsHost(data.players.find(p => p.id === playerId)?.isHost || false);
 
-        if (data.room.status === 'Playing' && phase === 'between') {
-          setCurrentIdx(data.room.currentGameIndex);
-          submittedRef.current = false;
-          setPhase('playing');
-        }
+        const me = data.players.find(p => p.id === playerId);
         if (data.room.status === 'Finished') {
           setPhase('finished');
-        }
-
-        // Check both room status AND player-level gameDone to handle race conditions
-        const everyoneDone = data.players.length > 0 && data.players.every(p => p.gameDone);
-        if (phase === 'waiting' && (data.room.status === 'Between Games' || data.room.status === 'Finished' || everyoneDone)) {
-          // Re-fetch to get final ranked scores
-          const freshData = await getRoomState({ roomId });
-          setPlayers(freshData.players);
-          setIsHost(freshData.players.find(p => p.id === playerId)?.isHost || false);
-          if (freshData.room.status === 'Finished') {
-            setPhase('finished');
+        } else if (data.room.status === 'Between Games') {
+          setPhase('between');
+        } else if (data.room.status === 'Playing') {
+          // A submitted player must remain in the waiting screen until the
+          // server advances the room. This prevents realtime updates from
+          // restarting a local game while another player is still playing.
+          if (me?.gameDone) {
+            setPhase('waiting');
           } else {
-            setPhase('between');
+            if (submittedRef.current) submittedRef.current = false;
+            setPhase('playing');
           }
         }
       } catch {}
@@ -108,11 +105,13 @@ export default function MultiplayerArenaPage() {
     void sync();
     if (!roomId) return () => { disposed = true; };
     const unsubscribe = subscribeToRoom(roomId, sync);
+    const pollTimer = window.setInterval(sync, 3000);
     return () => {
       disposed = true;
       unsubscribe();
+      window.clearInterval(pollTimer);
     };
-  }, [phase, roomId, playerId]);
+  }, [roomId, playerId]);
 
   // Navigate to results when finished
   useEffect(() => {
@@ -129,17 +128,18 @@ export default function MultiplayerArenaPage() {
       const result = await submitScore({ roomId, playerId, gameId, score, timeTakenMs });
       if (result.allDone && result.isLastGame) {
         setPhase('finished');
-      } else if (result.allDone) {
-        // Fetch latest scores before showing interstitial
-        const data = await getRoomState({ roomId });
-        setPlayers(data.players);
-        setIsHost(data.players.find(p => p.id === playerId)?.isHost || false);
-        setPhase('between');
       } else {
-        setPhase('waiting');
+        // The server changes the room to Between Games only after all
+        // players submit. The realtime/polling sync above moves everyone to
+        // the interstitial from that authoritative state.
+        setPhase(result.allDone ? 'between' : 'waiting');
       }
-    } catch {
-      setPhase('waiting');
+    } catch (error: any) {
+      // A failed submission must be retryable. Do not strand the player in
+      // the waiting screen with a permanently set submitted flag.
+      submittedRef.current = false;
+      setPhase('playing');
+      toast.error(error?.message || 'Could not submit your score. Please try again.');
     }
   }, [roomId, playerId, gameIDs, currentIdx]);
 
@@ -173,7 +173,7 @@ export default function MultiplayerArenaPage() {
               <div key={p.id} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border">
                 <span className="flex-1 text-sm font-semibold text-left">{p.name}</span>
                 <span className={`text-xs font-bold ${p.gameDone || p.id === playerId ? 'text-green-600' : 'text-muted-foreground'}`}>
-                  {p.gameDone || p.id === playerId ? '✓ Done' : '⏳ Playing'}
+                   {p.gameDone ? '✓ Done' : '⏳ Playing'}
                 </span>
               </div>
             ))}

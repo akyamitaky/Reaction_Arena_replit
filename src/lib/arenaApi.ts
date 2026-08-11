@@ -155,12 +155,23 @@ export async function submitScore(input: {
 export function subscribeToRoom(roomId: string, onChange: () => void) {
   const client = supabase;
   if (!client) return () => undefined;
+  let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+  let disposed = false;
+  const scheduleRefresh = () => {
+    if (disposed || refreshTimer) return;
+    refreshTimer = setTimeout(() => {
+      refreshTimer = undefined;
+      if (!disposed) onChange();
+    }, 100);
+  };
   const channel = client
     .channel(`reaction-arena:${roomId}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` }, onChange)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `room_id=eq.${roomId}` }, onChange)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` }, scheduleRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `room_id=eq.${roomId}` }, scheduleRefresh)
     .subscribe();
   return () => {
+    disposed = true;
+    if (refreshTimer) clearTimeout(refreshTimer);
     void client.removeChannel(channel);
   };
 }
