@@ -25,6 +25,7 @@ export default function LobbyPage() {
       try {
         const result = await joinRoom({ code: state.joinCode, playerName: state.playerName });
         localStorage.setItem('playerId', result.playerId);
+        localStorage.setItem('playerToken', result.playerToken);
         localStorage.setItem('roomId', result.roomId);
         setRoomId(result.roomId);
         setGameCount(result.gameCount);
@@ -71,7 +72,8 @@ export default function LobbyPage() {
     setStarting(true);
     try {
       const playerId = localStorage.getItem('playerId') || '';
-      await startArena({ roomId, playerId });
+      const playerToken = localStorage.getItem('playerToken') || '';
+      await startArena({ roomId, playerId, playerToken });
     } catch (e: any) {
       toast.error(e.message || 'Failed to start');
       setStarting(false);

@@ -23,8 +23,14 @@ The browser uses only the Supabase anon/publishable key. Room creation, joining,
 
 Without the Supabase variables, solo practice remains available and multiplayer actions show a configuration error instead of using a fallback or hard-coded credential.
 
-### ⚠️ Security note before applying the migration
+### Multiplayer security
 
-The current migration's RPCs identify players via a caller-supplied `p_player_id` rather than a Supabase-authenticated identity (`auth.uid()`). Because the RLS policies expose all player records publicly, any client can look up a room's host ID and call `start_arena` or `advance_game` as that host, or submit arbitrary scores for any player.
+Apply all migration files in timestamp order. The latest migration adds an
+unguessable per-player capability token. The browser stores the token locally,
+while Supabase stores only its SHA-256 hash; public player reads never expose it.
+Host actions and score submissions require both the player ID and matching
+token, and scores are bounded to the maximum supported arena score.
 
-**Do not apply the migration to a public Supabase project without first reworking authorization to use Supabase Auth (`auth.uid()`) or an unguessable per-player capability token that is never exposed in a public read policy.**
+This is anonymous-play authorization rather than account authentication. A
+player can still choose to tamper with their own browser, but cannot use a
+publicly readable player ID to act as another player or host.

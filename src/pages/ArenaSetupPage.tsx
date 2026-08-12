@@ -26,6 +26,7 @@ export default function ArenaSetupPage() {
     try {
       const result = await createRoom({ hostName: name, gameCount });
       localStorage.setItem('playerId', result.playerId);
+      localStorage.setItem('playerToken', result.playerToken);
       localStorage.setItem('roomId', result.roomId);
       navigate('/lobby', { state: { roomId: result.roomId, isHost: true } });
     } catch (e: any) {

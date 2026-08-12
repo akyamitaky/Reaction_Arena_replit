@@ -57,7 +57,7 @@ function asError(error: { message?: string } | null) {
   const message = error?.message || '';
   if (message.includes('Could not find the function public.create_room') || message.includes('schema cache')) {
     return new Error(
-      'Multiplayer is almost configured. Run supabase/migrations/20260809000000_reaction_arena.sql in your Supabase SQL Editor, then try creating the room again.',
+      'Multiplayer is almost configured. Run all SQL files in supabase/migrations/ in your Supabase SQL Editor, then try again.',
     );
   }
   return new Error(message || 'Something went wrong. Please try again.');
@@ -104,7 +104,7 @@ export async function createRoom(input: { hostName: string; gameCount: number })
     p_game_count: input.gameCount,
   });
   if (error) throw asError(error);
-  return data as { roomId: string; roomCode: string; playerId: string };
+  return data as { roomId: string; roomCode: string; playerId: string; playerToken: string };
 }
 
 export async function joinRoom(input: { code: string; playerName: string }) {
@@ -113,22 +113,24 @@ export async function joinRoom(input: { code: string; playerName: string }) {
     p_player_name: input.playerName,
   });
   if (error) throw asError(error);
-  return data as { roomId: string; playerId: string; gameCount: number };
+  return data as { roomId: string; playerId: string; playerToken: string; gameCount: number };
 }
 
-export async function startArena(input: { roomId: string; playerId: string }) {
+export async function startArena(input: { roomId: string; playerId: string; playerToken: string }) {
   const { data, error } = await requireSupabase().rpc('start_arena', {
     p_room_id: input.roomId,
     p_player_id: input.playerId,
+    p_player_token: input.playerToken,
   });
   if (error) throw asError(error);
   return data as { success: boolean };
 }
 
-export async function advanceGame(input: { roomId: string; playerId: string }) {
+export async function advanceGame(input: { roomId: string; playerId: string; playerToken: string }) {
   const { data, error } = await requireSupabase().rpc('advance_game', {
     p_room_id: input.roomId,
     p_player_id: input.playerId,
+    p_player_token: input.playerToken,
   });
   if (error) throw asError(error);
   return data as { success: boolean };
@@ -137,6 +139,7 @@ export async function advanceGame(input: { roomId: string; playerId: string }) {
 export async function submitScore(input: {
   roomId: string;
   playerId: string;
+  playerToken: string;
   gameId: string;
   score: number;
   timeTakenMs: number;
@@ -144,6 +147,7 @@ export async function submitScore(input: {
   const { data, error } = await requireSupabase().rpc('submit_score', {
     p_room_id: input.roomId,
     p_player_id: input.playerId,
+    p_player_token: input.playerToken,
     p_game_id: input.gameId,
     p_score: input.score,
     p_time_taken_ms: input.timeTakenMs,

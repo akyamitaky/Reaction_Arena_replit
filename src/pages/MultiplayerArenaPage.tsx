@@ -62,6 +62,7 @@ export default function MultiplayerArenaPage() {
   const navigate = useNavigate();
   const roomId = state?.roomId || localStorage.getItem('roomId') || '';
   const playerId = localStorage.getItem('playerId') || '';
+  const playerToken = localStorage.getItem('playerToken') || '';
   const [gameIDs, setGameIDs] = useState<string[]>(state?.gameIDs || []);
   const [currentIdx, setCurrentIdx] = useState(state?.currentGameIndex || 0);
   const [phase, setPhase] = useState<Phase>('playing');
@@ -125,7 +126,7 @@ export default function MultiplayerArenaPage() {
     submittedRef.current = true;
     const gameId = gameIDs[currentIdx];
     try {
-      const result = await submitScore({ roomId, playerId, gameId, score, timeTakenMs });
+      const result = await submitScore({ roomId, playerId, playerToken, gameId, score, timeTakenMs });
       if (result.allDone && result.isLastGame) {
         setPhase('finished');
       } else {
@@ -146,7 +147,7 @@ export default function MultiplayerArenaPage() {
   const handleAdvance = async () => {
     setAdvancing(true);
     try {
-      await advanceGame({ roomId, playerId });
+      await advanceGame({ roomId, playerId, playerToken });
     } catch {}
     setAdvancing(false);
   };
