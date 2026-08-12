@@ -73,6 +73,9 @@ export default function LobbyPage() {
     try {
       const playerId = localStorage.getItem('playerId') || '';
       const playerToken = localStorage.getItem('playerToken') || '';
+      if (!playerId || !/^[a-f0-9]{64}$/i.test(playerToken)) {
+        throw new Error('Refresh the app and create a new room to get a valid host session.');
+      }
       await startArena({ roomId, playerId, playerToken });
     } catch (e: any) {
       toast.error(e.message || 'Failed to start');

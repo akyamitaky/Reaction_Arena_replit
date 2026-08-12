@@ -60,7 +60,25 @@ function asError(error: { message?: string } | null) {
       'Multiplayer is almost configured. Run all SQL files in supabase/migrations/ in your Supabase SQL Editor, then try again.',
     );
   }
+  if (
+    message.includes('Only the host can start.') ||
+    message.includes('Only the host can advance.') ||
+    message.includes('Player authorization failed.')
+  ) {
+    return new Error(
+      'This lobby session is missing a valid player token. Refresh the app and create or join a new room after applying the latest migration.',
+    );
+  }
   return new Error(message || 'Something went wrong. Please try again.');
+}
+
+function readPlayerToken(value: unknown) {
+  if (typeof value !== 'string' || !/^[a-f0-9]{64}$/i.test(value)) {
+    throw new Error(
+      'Multiplayer needs the latest security migration. Refresh the app and create or join a new room.',
+    );
+  }
+  return value;
 }
 
 function mapRoom(row: RoomRow): Room {
@@ -104,7 +122,8 @@ export async function createRoom(input: { hostName: string; gameCount: number })
     p_game_count: input.gameCount,
   });
   if (error) throw asError(error);
-  return data as { roomId: string; roomCode: string; playerId: string; playerToken: string };
+  const result = data as { roomId: string; roomCode: string; playerId: string; playerToken?: unknown };
+  return { ...result, playerToken: readPlayerToken(result.playerToken) };
 }
 
 export async function joinRoom(input: { code: string; playerName: string }) {
@@ -113,7 +132,8 @@ export async function joinRoom(input: { code: string; playerName: string }) {
     p_player_name: input.playerName,
   });
   if (error) throw asError(error);
-  return data as { roomId: string; playerId: string; playerToken: string; gameCount: number };
+  const result = data as { roomId: string; playerId: string; playerToken?: unknown; gameCount: number };
+  return { ...result, playerToken: readPlayerToken(result.playerToken) };
 }
 
 export async function startArena(input: { roomId: string; playerId: string; playerToken: string }) {
