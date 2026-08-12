@@ -162,5 +162,32 @@ $$;
 
 grant execute on function public.create_room(text, integer), public.join_room(text, text), public.start_arena(uuid, uuid), public.advance_game(uuid, uuid), public.submit_score(uuid, uuid, text, integer, integer) to anon, authenticated;
 
-alter publication supabase_realtime add table public.rooms;
-alter publication supabase_realtime add table public.players;
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_rel pr
+    join pg_class c on c.oid = pr.prrelid
+    join pg_namespace n on n.oid = c.relnamespace
+    join pg_publication p on p.oid = pr.prpubid
+    where p.pubname = 'supabase_realtime'
+      and n.nspname = 'public'
+      and c.relname = 'rooms'
+  ) then
+    alter publication supabase_realtime add table public.rooms;
+  end if;
+
+  if not exists (
+    select 1
+    from pg_publication_rel pr
+    join pg_class c on c.oid = pr.prrelid
+    join pg_namespace n on n.oid = c.relnamespace
+    join pg_publication p on p.oid = pr.prpubid
+    where p.pubname = 'supabase_realtime'
+      and n.nspname = 'public'
+      and c.relname = 'players'
+  ) then
+    alter publication supabase_realtime add table public.players;
+  end if;
+end;
+$$;
