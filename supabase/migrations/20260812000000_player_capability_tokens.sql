@@ -61,9 +61,9 @@ begin
   values (v_code, trim(p_host_name), p_game_count, v_games)
   returning * into v_room;
 
-  v_player_token := encode(gen_random_bytes(32), 'hex');
+  v_player_token := encode(extensions.gen_random_bytes(32), 'hex');
   insert into players(name, room_id, is_host, player_token_hash)
-  values (trim(p_host_name), v_room.id, true, encode(digest(v_player_token, 'sha256'), 'hex'))
+  values (trim(p_host_name), v_room.id, true, encode(extensions.digest(v_player_token, 'sha256'), 'hex'))
   returning * into v_player;
 
   return jsonb_build_object(
@@ -114,9 +114,9 @@ begin
     raise exception 'Someone with that name is already in the room.';
   end if;
 
-  v_player_token := encode(gen_random_bytes(32), 'hex');
+  v_player_token := encode(extensions.gen_random_bytes(32), 'hex');
   insert into players(name, room_id, player_token_hash)
-  values (trim(p_player_name), v_room.id, encode(digest(v_player_token, 'sha256'), 'hex'))
+  values (trim(p_player_name), v_room.id, encode(extensions.digest(v_player_token, 'sha256'), 'hex'))
   returning * into v_player;
 
   return jsonb_build_object(
@@ -153,7 +153,7 @@ begin
     where id = p_player_id
       and room_id = p_room_id
       and is_host
-      and player_token_hash = encode(digest(p_player_token, 'sha256'), 'hex')
+      and player_token_hash = encode(extensions.digest(p_player_token, 'sha256'), 'hex')
   ) then
     raise exception 'Only the host can start.';
   end if;
@@ -191,7 +191,7 @@ begin
     where id = p_player_id
       and room_id = p_room_id
       and is_host
-      and player_token_hash = encode(digest(p_player_token, 'sha256'), 'hex')
+      and player_token_hash = encode(extensions.digest(p_player_token, 'sha256'), 'hex')
   ) then
     raise exception 'Only the host can advance.';
   end if;
@@ -251,7 +251,7 @@ begin
   from players
   where id = p_player_id
     and room_id = p_room_id
-    and player_token_hash = encode(digest(p_player_token, 'sha256'), 'hex')
+    and player_token_hash = encode(extensions.digest(p_player_token, 'sha256'), 'hex')
   for update;
   if not found then
     raise exception 'Player authorization failed.';
