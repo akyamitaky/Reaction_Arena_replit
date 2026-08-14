@@ -33,8 +33,8 @@ begin
   if char_length(trim(p_host_name)) > 40 then
     raise exception 'Player name must be 40 characters or fewer';
   end if;
-  if p_game_count is null or p_game_count < 3 or p_game_count > 26 then
-    raise exception 'Game count must be between 3 and 26';
+  if p_game_count is null or p_game_count < 3 or p_game_count > 21 then
+    raise exception 'Game count must be between 3 and 21';
   end if;
 
   loop
@@ -48,7 +48,7 @@ begin
   into v_games
   from (values
     ('color'), ('memory'), ('math'), ('reflex'), ('reverse'), ('count'), ('sequence'), ('emoji'), ('stroop'), ('oddone'),
-    ('scramble'), ('impostor'), ('chain'), ('riddles'), ('flags'), ('morse'), ('periodic'), ('binary'), ('capitals'),
+    ('scramble'), ('impostor'), ('chain'), ('riddles'),
     ('missingnum'), ('emojitalk'), ('truefalse'), ('colormem'), ('speedtype'), ('tilematch'), ('scribble')
   ) as game(id);
   v_games := (

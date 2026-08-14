@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { GameContext } from '@/components/GameShell';
 
 function generate() {
-  const type = Math.floor(Math.random() * 3);
+  const type = Math.floor(Math.random() * 2);
   if (type === 0) {
     const a = Math.floor(Math.random() * 20) + 2;
     const b = Math.floor(Math.random() * 20) + 2;
@@ -10,17 +10,6 @@ function generate() {
     const isTrue = Math.random() > 0.5;
     const shown = isTrue ? correct : correct + Math.floor(Math.random() * 10) + 1;
     return { statement: `${a} × ${b} = ${shown}`, answer: isTrue };
-  } else if (type === 1) {
-    const facts: [string, boolean][] = [
-      ['The Earth is the 3rd planet from the Sun', true], ['Humans have 206 bones', true],
-      ['The speed of light is faster than sound', true], ['Water boils at 90°C at sea level', false],
-      ['A hexagon has 6 sides', true], ['Mars is bigger than Earth', false],
-      ['An octopus has 3 hearts', true], ['The Moon has its own light', false],
-      ['Diamonds are made of carbon', true], ['Gold is lighter than silver', false],
-      ['A year on Jupiter is shorter than Earth', false], ['Sound travels faster in water than air', true],
-    ];
-    const [s, a] = facts[Math.floor(Math.random() * facts.length)];
-    return { statement: s, answer: a };
   } else {
     const a = Math.floor(Math.random() * 50) + 10;
     const b = Math.floor(Math.random() * 50) + 10;

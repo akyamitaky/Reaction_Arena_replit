@@ -59,7 +59,7 @@ export default function HomePage() {
           <h1 className="text-5xl sm:text-7xl font-bold tracking-[-.06em] leading-[.96] max-w-xl">Train fast.<br /><span className="text-primary">Think sharper.</span></h1>
           <p className="text-muted-foreground text-lg mt-6 max-w-lg leading-relaxed">A focused arena for quick minds. Pick a mode, challenge your friends, and make every reaction count.</p>
           <div className="flex flex-wrap gap-3 mt-8 text-sm text-muted-foreground">
-            <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-primary" />26 precision modes</span>
+            <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-primary" />21 kid-friendly modes</span>
             <span className="flex items-center gap-2"><Users className="w-4 h-4 text-accent" />Up to 8 players</span>
           </div>
         </motion.div>
@@ -103,7 +103,7 @@ export default function HomePage() {
           </CardContent>
         </Card>
 
-        <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-secondary/30 px-5 py-4 mt-5"><div><p className="text-xs uppercase tracking-widest text-muted-foreground">Momentum</p><p className="font-display font-bold mt-1">Build your streak</p></div><div className="text-right"><p className="text-2xl font-display font-bold text-primary">26</p><p className="text-[11px] text-muted-foreground">ways to play</p></div></div>
+        <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-secondary/30 px-5 py-4 mt-5"><div><p className="text-xs uppercase tracking-widest text-muted-foreground">Momentum</p><p className="font-display font-bold mt-1">Build your streak</p></div><div className="text-right"><p className="text-2xl font-display font-bold text-primary">21</p><p className="text-[11px] text-muted-foreground">kid-friendly ways to play</p></div></div>
         <GameModeGrid />
         </motion.div>
       </main>

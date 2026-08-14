@@ -12,7 +12,7 @@ const PRESETS = [
   { count: 10, label: 'Standard', emoji: '🎯', desc: '~20 min' },
   { count: 15, label: 'Extended', emoji: '🔥', desc: '~30 min' },
   { count: 20, label: 'Marathon', emoji: '🏆', desc: '~40 min' },
-  { count: 26, label: 'All Games', emoji: '💀', desc: '~50 min' },
+  { count: 21, label: 'All Games', emoji: '💀', desc: '~40 min' },
 ];
 
 export default function ArenaSetupPage() {
@@ -66,10 +66,10 @@ export default function ArenaSetupPage() {
             <span className="text-sm font-semibold">Or pick a custom number</span>
             <span className="text-2xl font-black text-primary tabular-nums">{gameCount}</span>
           </div>
-          <Slider value={[gameCount]} onValueChange={v => setGameCount(v[0])} min={3} max={26} step={1} />
+          <Slider value={[gameCount]} onValueChange={v => setGameCount(v[0])} min={3} max={21} step={1} />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>3 games</span>
-            <span>26 games</span>
+            <span>21 games</span>
           </div>
         </div>
 

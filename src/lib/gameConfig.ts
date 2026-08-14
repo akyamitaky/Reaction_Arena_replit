@@ -2,7 +2,7 @@ import {
   Eye, Brain, Calculator, Zap, Shuffle, Hash,
   Target, Puzzle, Timer, Users, Type, Search, Link2, CircleHelp,
   MessageCircle, CircleCheckBig, Palette, Keyboard, Grid3x3, Pencil,
-  Lightbulb, Flag, Radio, Atom, Binary, MapPin,
+  Lightbulb,
 } from 'lucide-react';
 
 export interface GameMode {
@@ -30,11 +30,6 @@ export const gameModes: GameMode[] = [
   { id: 'impostor', label: 'Impostor', icon: Search, color: 'text-chart-2', description: 'Find the different item', rounds: 10, timePerRound: 5 },
   { id: 'chain', label: 'Chain', icon: Link2, color: 'text-primary', description: 'Continue the number chain', rounds: 8, timePerRound: 8 },
   { id: 'riddles', label: 'Riddles', icon: Lightbulb, color: 'text-chart-5', description: 'Solve clever riddles', rounds: 10, timePerRound: 15 },
-  { id: 'flags', label: 'Flags', icon: Flag, color: 'text-chart-1', description: 'Name the country by its flag', rounds: 10, timePerRound: 8 },
-  { id: 'morse', label: 'Morse', icon: Radio, color: 'text-chart-3', description: 'Decode Morse code words', rounds: 8, timePerRound: 15 },
-  { id: 'periodic', label: 'Periodic', icon: Atom, color: 'text-chart-2', description: 'Identify chemical elements', rounds: 10, timePerRound: 8 },
-  { id: 'binary', label: 'Binary', icon: Binary, color: 'text-primary', description: 'Convert binary to decimal', rounds: 8, timePerRound: 12 },
-  { id: 'capitals', label: 'Capitals', icon: MapPin, color: 'text-chart-4', description: 'Name the country\'s capital', rounds: 10, timePerRound: 8 },
   { id: 'missingnum', label: 'Missing #', icon: CircleHelp, color: 'text-chart-4', description: 'Find the missing number', rounds: 8, timePerRound: 10 },
   { id: 'emojitalk', label: 'Emoji Talk', icon: MessageCircle, color: 'text-chart-5', description: 'Guess the phrase from emojis', rounds: 8, timePerRound: 10 },
   { id: 'truefalse', label: 'True/False', icon: CircleCheckBig, color: 'text-accent-foreground', description: 'Is the statement true?', rounds: 12, timePerRound: 5 },
