@@ -1,4 +1,4 @@
--- Add fresh child-friendly games to the already-deployed room creator.
+-- Add competitive, fast-scoring games to the multiplayer room rotation.
 alter table public.rooms drop constraint if exists rooms_game_count_check;
 alter table public.rooms add constraint rooms_game_count_check check (game_count between 3 and 27);
 

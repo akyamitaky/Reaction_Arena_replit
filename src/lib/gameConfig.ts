@@ -40,6 +40,9 @@ export const gameModes: GameMode[] = [
   { id: 'scribble', label: 'Scribble', icon: Pencil, color: 'text-chart-5', description: 'Draw what you see described', rounds: 5, timePerRound: 15 },
   { id: 'shapes', label: 'Shape Match', icon: Puzzle, color: 'text-chart-3', description: 'Find the matching shape', rounds: 10, timePerRound: 8 },
   { id: 'wordhunt', label: 'Word Hunt', icon: Type, color: 'text-primary', description: 'Find the hidden word', rounds: 8, timePerRound: 12 },
+  { id: 'whack', label: 'Whack Attack', icon: Zap, color: 'text-chart-1', description: 'Whack fast for room points', rounds: 5, timePerRound: 10 },
+  { id: 'treasure', label: 'Treasure Pick', icon: Target, color: 'text-chart-3', description: 'Risk it for the jackpot', rounds: 8, timePerRound: 8 },
+  { id: 'duel', label: 'Emoji Duel', icon: Users, color: 'text-chart-5', description: 'Beat the room with rock, paper, scissors', rounds: 8, timePerRound: 8 },
 ];
 
 export function getGameMode(id: string) {

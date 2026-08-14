@@ -4,7 +4,7 @@ create table if not exists public.rooms (
   id uuid primary key default gen_random_uuid(),
   code text not null unique check (code ~ '^[A-Z2-9]{5}$'),
   host_name text not null check (char_length(host_name) between 1 and 40),
-  game_count integer not null check (game_count between 3 and 24),
+  game_count integer not null check (game_count between 3 and 27),
   game_ids jsonb not null default '[]'::jsonb,
   current_game_index integer not null default 0,
   status text not null default 'Waiting' check (status in ('Waiting', 'Playing', 'Between Games', 'Finished')),
@@ -55,8 +55,8 @@ begin
   if p_host_name is null or char_length(trim(p_host_name)) = 0 then
     raise exception 'Player name is required';
   end if;
-  if p_game_count < 3 or p_game_count > 24 then
-    raise exception 'Game count must be between 3 and 24';
+  if p_game_count < 3 or p_game_count > 27 then
+    raise exception 'Game count must be between 3 and 27';
   end if;
   v_code := '';
   for i in 1..5 loop
@@ -69,7 +69,8 @@ begin
   from (values
     ('color'), ('memory'), ('math'), ('reflex'), ('catch'), ('reverse'), ('count'), ('sequence'), ('emoji'), ('stroop'), ('oddone'),
     ('scramble'), ('impostor'), ('chain'), ('riddles'),
-    ('missingnum'), ('emojitalk'), ('truefalse'), ('colormem'), ('speedtype'), ('tilematch'), ('scribble'), ('shapes'), ('wordhunt')
+    ('missingnum'), ('emojitalk'), ('truefalse'), ('colormem'), ('speedtype'), ('tilematch'), ('scribble'), ('shapes'), ('wordhunt'),
+    ('whack'), ('treasure'), ('duel')
   ) as game(id);
   v_games := (select jsonb_agg(value) from jsonb_array_elements(v_games) with ordinality as x(value, n) where n <= p_game_count);
   insert into rooms(code, host_name, game_count, game_ids) values (v_code, trim(p_host_name), p_game_count, v_games) returning * into v_room;

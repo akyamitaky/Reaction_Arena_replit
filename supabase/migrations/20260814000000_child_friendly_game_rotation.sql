@@ -1,7 +1,7 @@
 -- Keep new multiplayer rooms limited to reaction, puzzle, and creative games.
 -- This replaces the already-deployed room creator for existing Supabase projects.
 alter table public.rooms drop constraint if exists rooms_game_count_check;
-alter table public.rooms add constraint rooms_game_count_check check (game_count between 3 and 24);
+alter table public.rooms add constraint rooms_game_count_check check (game_count between 3 and 27);
 
 create or replace function public.create_room(p_host_name text, p_game_count integer)
 returns jsonb
@@ -22,8 +22,8 @@ begin
   if char_length(trim(p_host_name)) > 40 then
     raise exception 'Player name must be 40 characters or fewer';
   end if;
-  if p_game_count is null or p_game_count < 3 or p_game_count > 24 then
-    raise exception 'Game count must be between 3 and 24';
+  if p_game_count is null or p_game_count < 3 or p_game_count > 27 then
+    raise exception 'Game count must be between 3 and 27';
   end if;
 
   loop
@@ -38,7 +38,8 @@ begin
   from (values
     ('color'), ('memory'), ('math'), ('reflex'), ('catch'), ('reverse'), ('count'), ('sequence'), ('emoji'), ('stroop'), ('oddone'),
     ('scramble'), ('impostor'), ('chain'), ('riddles'),
-    ('missingnum'), ('emojitalk'), ('truefalse'), ('colormem'), ('speedtype'), ('tilematch'), ('scribble'), ('shapes'), ('wordhunt')
+    ('missingnum'), ('emojitalk'), ('truefalse'), ('colormem'), ('speedtype'), ('tilematch'), ('scribble'), ('shapes'), ('wordhunt'),
+    ('whack'), ('treasure'), ('duel')
   ) as game(id);
   v_games := (
     select jsonb_agg(value)

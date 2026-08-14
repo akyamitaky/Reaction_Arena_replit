@@ -31,6 +31,9 @@ import RiddleGame from '@/components/games/RiddleGame';
 import CatchGame from '@/components/games/CatchGame';
 import ShapeMatchGame from '@/components/games/ShapeMatchGame';
 import WordHuntGame from '@/components/games/WordHuntGame';
+import WhackGame from '@/components/games/WhackGame';
+import TreasureGame from '@/components/games/TreasureGame';
+import DuelGame from '@/components/games/DuelGame';
 
 const GAME_COMPONENTS: Record<string, React.ComponentType<GameContext>> = {
   color: ColorGame, math: MathGame, reflex: ReflexGame, stroop: StroopGame,
@@ -41,6 +44,7 @@ const GAME_COMPONENTS: Record<string, React.ComponentType<GameContext>> = {
   colormem: ColorMemGame, tilematch: TileMatchGame, oddone: OddOneGame,
   scribble: ScribbleGame, riddles: RiddleGame, catch: CatchGame,
   shapes: ShapeMatchGame, wordhunt: WordHuntGame,
+  whack: WhackGame, treasure: TreasureGame, duel: DuelGame,
 };
 
 type Phase = 'playing' | 'waiting' | 'between' | 'finished';
