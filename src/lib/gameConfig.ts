@@ -20,6 +20,7 @@ export const gameModes: GameMode[] = [
   { id: 'memory', label: 'Memory', icon: Brain, color: 'text-primary', description: 'Remember the sequence', rounds: 8, timePerRound: 0 },
   { id: 'math', label: 'Math', icon: Calculator, color: 'text-chart-3', description: 'Solve quick arithmetic', rounds: 10, timePerRound: 8 },
   { id: 'reflex', label: 'Reflex', icon: Zap, color: 'text-accent-foreground', description: 'Tap when the screen turns green', rounds: 5, timePerRound: 0 },
+  { id: 'catch', label: 'Catch It', icon: Zap, color: 'text-chart-1', description: 'Catch the moving friend', rounds: 8, timePerRound: 6 },
   { id: 'reverse', label: 'Reverse', icon: Shuffle, color: 'text-chart-5', description: 'Type the word backwards', rounds: 8, timePerRound: 10 },
   { id: 'count', label: 'Count', icon: Hash, color: 'text-chart-1', description: 'Count the items quickly', rounds: 8, timePerRound: 8 },
   { id: 'sequence', label: 'Sequence', icon: Target, color: 'text-chart-2', description: 'Repeat the pattern', rounds: 8, timePerRound: 0 },
@@ -37,6 +38,8 @@ export const gameModes: GameMode[] = [
   { id: 'speedtype', label: 'Speed Type', icon: Keyboard, color: 'text-chart-2', description: 'Type the text as fast as you can', rounds: 6, timePerRound: 15 },
   { id: 'tilematch', label: 'Tile Match', icon: Grid3x3, color: 'text-chart-3', description: 'Match the pairs', rounds: 5, timePerRound: 30 },
   { id: 'scribble', label: 'Scribble', icon: Pencil, color: 'text-chart-5', description: 'Draw what you see described', rounds: 5, timePerRound: 15 },
+  { id: 'shapes', label: 'Shape Match', icon: Puzzle, color: 'text-chart-3', description: 'Find the matching shape', rounds: 10, timePerRound: 8 },
+  { id: 'wordhunt', label: 'Word Hunt', icon: Type, color: 'text-primary', description: 'Find the hidden word', rounds: 8, timePerRound: 12 },
 ];
 
 export function getGameMode(id: string) {

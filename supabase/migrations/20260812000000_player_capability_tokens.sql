@@ -33,8 +33,8 @@ begin
   if char_length(trim(p_host_name)) > 40 then
     raise exception 'Player name must be 40 characters or fewer';
   end if;
-  if p_game_count is null or p_game_count < 3 or p_game_count > 21 then
-    raise exception 'Game count must be between 3 and 21';
+  if p_game_count is null or p_game_count < 3 or p_game_count > 24 then
+    raise exception 'Game count must be between 3 and 24';
   end if;
 
   loop
@@ -47,9 +47,9 @@ begin
   select jsonb_agg(game.id order by random())
   into v_games
   from (values
-    ('color'), ('memory'), ('math'), ('reflex'), ('reverse'), ('count'), ('sequence'), ('emoji'), ('stroop'), ('oddone'),
+    ('color'), ('memory'), ('math'), ('reflex'), ('catch'), ('reverse'), ('count'), ('sequence'), ('emoji'), ('stroop'), ('oddone'),
     ('scramble'), ('impostor'), ('chain'), ('riddles'),
-    ('missingnum'), ('emojitalk'), ('truefalse'), ('colormem'), ('speedtype'), ('tilematch'), ('scribble')
+    ('missingnum'), ('emojitalk'), ('truefalse'), ('colormem'), ('speedtype'), ('tilematch'), ('scribble'), ('shapes'), ('wordhunt')
   ) as game(id);
   v_games := (
     select jsonb_agg(value)

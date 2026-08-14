@@ -1,5 +1,4 @@
--- Keep new multiplayer rooms limited to reaction, puzzle, and creative games.
--- This replaces the already-deployed room creator for existing Supabase projects.
+-- Add fresh child-friendly games to the already-deployed room creator.
 alter table public.rooms drop constraint if exists rooms_game_count_check;
 alter table public.rooms add constraint rooms_game_count_check check (game_count between 3 and 24);
 
@@ -38,7 +37,8 @@ begin
   from (values
     ('color'), ('memory'), ('math'), ('reflex'), ('catch'), ('reverse'), ('count'), ('sequence'), ('emoji'), ('stroop'), ('oddone'),
     ('scramble'), ('impostor'), ('chain'), ('riddles'),
-    ('missingnum'), ('emojitalk'), ('truefalse'), ('colormem'), ('speedtype'), ('tilematch'), ('scribble'), ('shapes'), ('wordhunt')
+    ('missingnum'), ('emojitalk'), ('truefalse'), ('colormem'), ('speedtype'), ('tilematch'), ('scribble'),
+    ('shapes'), ('wordhunt')
   ) as game(id);
   v_games := (
     select jsonb_agg(value)

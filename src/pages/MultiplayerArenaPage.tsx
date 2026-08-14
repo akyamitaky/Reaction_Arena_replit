@@ -28,6 +28,9 @@ import TileMatchGame from '@/components/games/TileMatchGame';
 import OddOneGame from '@/components/games/OddOneGame';
 import ScribbleGame from '@/components/games/ScribbleGame';
 import RiddleGame from '@/components/games/RiddleGame';
+import CatchGame from '@/components/games/CatchGame';
+import ShapeMatchGame from '@/components/games/ShapeMatchGame';
+import WordHuntGame from '@/components/games/WordHuntGame';
 
 const GAME_COMPONENTS: Record<string, React.ComponentType<GameContext>> = {
   color: ColorGame, math: MathGame, reflex: ReflexGame, stroop: StroopGame,
@@ -36,7 +39,8 @@ const GAME_COMPONENTS: Record<string, React.ComponentType<GameContext>> = {
   sequence: SequenceGame, memory: MemoryGame, impostor: ImpostorGame,
   chain: ChainGame, missingnum: MissingNumGame, emojitalk: EmojiTalkGame,
   colormem: ColorMemGame, tilematch: TileMatchGame, oddone: OddOneGame,
-  scribble: ScribbleGame, riddles: RiddleGame,
+  scribble: ScribbleGame, riddles: RiddleGame, catch: CatchGame,
+  shapes: ShapeMatchGame, wordhunt: WordHuntGame,
 };
 
 type Phase = 'playing' | 'waiting' | 'between' | 'finished';
