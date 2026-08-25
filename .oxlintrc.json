@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "warn",
+    "restriction": "off",
+    "pedantic": "off"
+  },
+  "rules": {
+    "no-array-sort": "off",
+    "no-array-reverse": "off"
+  }
+}

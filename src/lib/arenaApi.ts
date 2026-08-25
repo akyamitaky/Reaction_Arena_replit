@@ -53,30 +53,49 @@ type PlayerRow = {
   game_done: boolean;
 };
 
-function asError(error: { message?: string } | null) {
+interface PostgrestErrorLike {
+  code?: string;
+  message?: string;
+}
+
+/** SQLSTATE codes that indicate the security migration is not deployed. */
+const MIGRATION_MISSING_CODES = new Set(['P0001', 'P0002', '42883', '42704']);
+
+/** SQLSTATE prefixes for authorization failures on mutating RPCs. */
+const AUTH_ERROR_CODES = new Set(['A0022', 'A0031', 'A0041']);
+
+export function asError(error: PostgrestErrorLike | null) {
   const message = error?.message || '';
-  if (message.includes('Could not find the function public.create_room') || message.includes('schema cache')) {
+  const code = error?.code || '';
+
+  const isMigrationMissing =
+    MIGRATION_MISSING_CODES.has(code) ||
+    message.includes('Could not find the function public.create_room') ||
+    message.includes('schema cache');
+  if (isMigrationMissing) {
     return new Error(
       'Multiplayer is almost configured. Run all SQL files in supabase/migrations/ in your Supabase SQL Editor, then try again.',
     );
   }
-  if (
+
+  const isAuthFailure =
+    AUTH_ERROR_CODES.has(code) ||
     message.includes('Only the host can start.') ||
     message.includes('Only the host can advance.') ||
-    message.includes('Player authorization failed.')
-  ) {
+    message.includes('Player authorization failed.');
+  if (isAuthFailure) {
     return new Error(
       'This lobby session is missing a valid player token. Refresh the app and create or join a new room after applying the latest migration.',
     );
   }
+
+  // Remaining server messages are authored to be user-friendly.
   return new Error(message || 'Something went wrong. Please try again.');
 }
 
 function readPlayerToken(value: unknown) {
   if (typeof value !== 'string' || !/^[a-f0-9]{64}$/i.test(value)) {
-    throw new Error(
-      'Multiplayer needs the latest security migration. Refresh the app and create or join a new room.',
-    );
+    throw new Error('Multiplayer needs the latest security migration. Refresh the app and create or join a new room.');
   }
   return value;
 }
@@ -108,8 +127,16 @@ function mapPlayer(row: PlayerRow): Player {
 export async function getRoomState({ roomId }: { roomId: string }): Promise<RoomState> {
   const client = requireSupabase();
   const [{ data: room, error: roomError }, { data: players, error: playersError }] = await Promise.all([
-    client.from('rooms').select('id, code, host_name, game_count, game_ids, current_game_index, status').eq('id', roomId).single(),
-    client.from('players').select('id, name, total_score, game_scores, current_game_score, is_host, game_done').eq('room_id', roomId).order('total_score', { ascending: false }),
+    client
+      .from('rooms')
+      .select('id, code, host_name, game_count, game_ids, current_game_index, status')
+      .eq('id', roomId)
+      .single(),
+    client
+      .from('players')
+      .select('id, name, total_score, game_scores, current_game_score, is_host, game_done')
+      .eq('room_id', roomId)
+      .order('total_score', { ascending: false }),
   ]);
   if (roomError) throw asError(roomError);
   if (playersError) throw asError(playersError);
@@ -156,6 +183,21 @@ export async function advanceGame(input: { roomId: string; playerId: string; pla
   return data as { success: boolean };
 }
 
+/**
+ * Advances the room automatically once every player has finished and a grace
+ * period has elapsed. Any player in the room may trigger it, so a host that
+ * leaves mid-arena no longer stalls the game.
+ */
+export async function autoAdvanceRoom(input: { roomId: string; playerId: string; playerToken: string }) {
+  const { data, error } = await requireSupabase().rpc('auto_advance_room', {
+    p_room_id: input.roomId,
+    p_player_id: input.playerId,
+    p_player_token: input.playerToken,
+  });
+  if (error) throw asError(error);
+  return data as { advanced: boolean; reason?: string };
+}
+
 export async function submitScore(input: {
   roomId: string;
   playerId: string;
@@ -190,12 +232,135 @@ export function subscribeToRoom(roomId: string, onChange: () => void) {
   };
   const channel = client
     .channel(`reaction-arena:${roomId}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` }, scheduleRefresh)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `room_id=eq.${roomId}` }, scheduleRefresh)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` },
+      scheduleRefresh,
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'players', filter: `room_id=eq.${roomId}` },
+      scheduleRefresh,
+    )
     .subscribe();
   return () => {
     disposed = true;
     if (refreshTimer) clearTimeout(refreshTimer);
     void client.removeChannel(channel);
   };
+}
+
+// ---------------------------------------------------------------------------
+// Multiplayer Scribble
+// ---------------------------------------------------------------------------
+
+export interface ScribbleRoundState {
+  drawIdx: number;
+  totalPlayers: number;
+  drawerId: string;
+  drawerName: string;
+  youAreDrawer: boolean;
+  word: string | null;
+  roundWinnerName: string | null;
+  roundResolved: boolean;
+}
+
+export type ScribbleStroke = {
+  x: number;
+  y: number;
+  /** 'down' starts a new path, 'move' extends it, 'clear' wipes the board. */
+  type: 'down' | 'move' | 'clear';
+  color?: string;
+  /** Round the stroke belongs to, so late joiners skip stale strokes. */
+  drawIdx: number;
+};
+
+export async function cleanupStaleRooms(olderThanHours = 6) {
+  const { error } = await requireSupabase().rpc('cleanup_stale_rooms', {
+    p_older_than_hours: olderThanHours,
+  });
+  if (error) throw asError(error);
+}
+
+export async function beginScribbleRound(input: {
+  roomId: string;
+  playerId: string;
+  playerToken: string;
+}): Promise<ScribbleRoundState> {
+  const { data, error } = await requireSupabase().rpc('begin_scribble_round', {
+    p_room_id: input.roomId,
+    p_player_id: input.playerId,
+    p_player_token: input.playerToken,
+  });
+  if (error) throw asError(error);
+  return data as ScribbleRoundState;
+}
+
+export async function submitScribbleGuess(input: {
+  roomId: string;
+  playerId: string;
+  playerToken: string;
+  guess: string;
+}): Promise<{ correct: boolean; alreadyResolved: boolean; word: string | null }> {
+  const { data, error } = await requireSupabase().rpc('submit_scribble_guess', {
+    p_room_id: input.roomId,
+    p_player_id: input.playerId,
+    p_player_token: input.playerToken,
+    p_guess: input.guess,
+  });
+  if (error) throw asError(error);
+  return data as { correct: boolean; alreadyResolved: boolean; word: string | null };
+}
+
+export async function endScribbleRound(input: { roomId: string; playerId: string; playerToken: string }): Promise<{
+  allDone: boolean;
+  isLastGame: boolean;
+  word: string | null;
+  winnerName: string | null;
+  nextDrawerId: string | null;
+  nextDrawerName: string | null;
+}> {
+  const { data, error } = await requireSupabase().rpc('end_scribble_round', {
+    p_room_id: input.roomId,
+    p_player_id: input.playerId,
+    p_player_token: input.playerToken,
+  });
+  if (error) throw asError(error);
+  return data as {
+    allDone: boolean;
+    isLastGame: boolean;
+    word: string | null;
+    winnerName: string | null;
+    nextDrawerId: string | null;
+    nextDrawerName: string | null;
+  };
+}
+
+/** Real-time stroke relay for the shared scribble board. */
+export function subscribeToScribbleStrokes(roomId: string, onStroke: (stroke: ScribbleStroke) => void) {
+  const client = supabase;
+  if (!client) return () => undefined;
+  const channel = client
+    .channel(`scribble:${roomId}`)
+    .on('broadcast', { event: 'stroke' }, ({ payload }) => {
+      onStroke(payload as ScribbleStroke);
+    })
+    .subscribe();
+  return () => {
+    void client.removeChannel(channel);
+  };
+}
+
+export async function sendScribbleStroke(roomId: string, stroke: ScribbleStroke) {
+  const client = supabase;
+  if (!client) return;
+  try {
+    await client.channel(`scribble:${roomId}`).send({
+      type: 'broadcast',
+      event: 'stroke',
+      payload: stroke,
+    });
+  } catch {
+    // Strokes are best-effort; the drawer can still finish their turn.
+  }
 }

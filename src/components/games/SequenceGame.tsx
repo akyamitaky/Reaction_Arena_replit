@@ -3,7 +3,7 @@ import { GameContext } from '@/components/GameShell';
 
 const TILE_COLORS = ['bg-destructive', 'bg-primary', 'bg-chart-3', 'bg-chart-1'];
 
-export default function SequenceGame({ round, addScore, nextRound }: GameContext) {
+export default function SequenceGame({ round, addScore, reportWrong, nextRound }: GameContext) {
   const [sequence, setSequence] = useState<number[]>([]);
   const [playerInput, setPlayerInput] = useState<number[]>([]);
   const [phase, setPhase] = useState<'showing' | 'input' | 'feedback'>('showing');
@@ -17,7 +17,13 @@ export default function SequenceGame({ round, addScore, nextRound }: GameContext
       setTimeout(() => setActiveIdx(tile), i * 600);
       setTimeout(() => setActiveIdx(null), i * 600 + 400);
     });
-    setTimeout(() => { setPhase('input'); setActiveIdx(null); }, seq.length * 600 + 200);
+    setTimeout(
+      () => {
+        setPhase('input');
+        setActiveIdx(null);
+      },
+      seq.length * 600 + 200,
+    );
   }, []);
 
   useEffect(() => {
@@ -36,6 +42,7 @@ export default function SequenceGame({ round, addScore, nextRound }: GameContext
     setTimeout(() => setActiveIdx(null), 200);
 
     if (next[next.length - 1] !== sequence[next.length - 1]) {
+      reportWrong();
       setPhase('feedback');
       setFeedback('✗ Wrong sequence!');
       setTimeout(nextRound, 1000);

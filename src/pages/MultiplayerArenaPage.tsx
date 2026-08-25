@@ -1,80 +1,42 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { Suspense, useState, useCallback, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { getGameMode } from '@/lib/gameConfig';
 import GameShell from '@/components/GameShell';
 import MultiplayerInterstitial from '@/components/MultiplayerInterstitial';
-import { getRoomState, submitScore, advanceGame, subscribeToRoom } from '@/lib/arenaApi';
-import { GameContext } from '@/components/GameShell';
+import ScribbleArenaGame from '@/components/ScribbleArenaGame';
+import { getRoomState, submitScore, advanceGame, autoAdvanceRoom, subscribeToRoom, type Player } from '@/lib/arenaApi';
+import type { GameContext } from '@/components/GameShell';
+import { getGameComponent } from '@/lib/gameRegistry';
+import { storage } from '@/lib/storage';
+import { MAX_ARENA_SCORE } from '@/lib/gameConstants';
 import { toast } from 'sonner';
-
-import ColorGame from '@/components/games/ColorGame';
-import MathGame from '@/components/games/MathGame';
-import ReflexGame from '@/components/games/ReflexGame';
-import StroopGame from '@/components/games/StroopGame';
-import ReverseGame from '@/components/games/ReverseGame';
-import ScrambleGame from '@/components/games/ScrambleGame';
-import SpeedTypeGame from '@/components/games/SpeedTypeGame';
-import TrueFalseGame from '@/components/games/TrueFalseGame';
-import EmojiGame from '@/components/games/EmojiGame';
-import CountGame from '@/components/games/CountGame';
-import SequenceGame from '@/components/games/SequenceGame';
-import MemoryGame from '@/components/games/MemoryGame';
-import ImpostorGame from '@/components/games/ImpostorGame';
-import ChainGame from '@/components/games/ChainGame';
-import MissingNumGame from '@/components/games/MissingNumGame';
-import EmojiTalkGame from '@/components/games/EmojiTalkGame';
-import ColorMemGame from '@/components/games/ColorMemGame';
-import TileMatchGame from '@/components/games/TileMatchGame';
-import OddOneGame from '@/components/games/OddOneGame';
-import ScribbleGame from '@/components/games/ScribbleGame';
-import RiddleGame from '@/components/games/RiddleGame';
-import CatchGame from '@/components/games/CatchGame';
-import ShapeMatchGame from '@/components/games/ShapeMatchGame';
-import WordHuntGame from '@/components/games/WordHuntGame';
-import WhackGame from '@/components/games/WhackGame';
-import TreasureGame from '@/components/games/TreasureGame';
-import DuelGame from '@/components/games/DuelGame';
-
-const GAME_COMPONENTS: Record<string, React.ComponentType<GameContext>> = {
-  color: ColorGame, math: MathGame, reflex: ReflexGame, stroop: StroopGame,
-  reverse: ReverseGame, scramble: ScrambleGame, speedtype: SpeedTypeGame,
-  truefalse: TrueFalseGame, emoji: EmojiGame, count: CountGame,
-  sequence: SequenceGame, memory: MemoryGame, impostor: ImpostorGame,
-  chain: ChainGame, missingnum: MissingNumGame, emojitalk: EmojiTalkGame,
-  colormem: ColorMemGame, tilematch: TileMatchGame, oddone: OddOneGame,
-  scribble: ScribbleGame, riddles: RiddleGame, catch: CatchGame,
-  shapes: ShapeMatchGame, wordhunt: WordHuntGame,
-  whack: WhackGame, treasure: TreasureGame, duel: DuelGame,
-};
 
 type Phase = 'playing' | 'waiting' | 'between' | 'finished';
 
-interface PlayerData {
-  id: string;
-  name: string;
-  totalScore: number;
-  currentGameScore: number;
-  isHost: boolean;
-  gameDone: boolean;
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'Something went wrong. Please try again.';
 }
 
 export default function MultiplayerArenaPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const roomId = state?.roomId || localStorage.getItem('roomId') || '';
-  const playerId = localStorage.getItem('playerId') || '';
-  const playerToken = localStorage.getItem('playerToken') || '';
+  const roomId = state?.roomId || storage.getRoomId();
+  const playerId = storage.getPlayerId();
+  const playerToken = storage.getPlayerToken();
   const [gameIDs, setGameIDs] = useState<string[]>(state?.gameIDs || []);
   const [currentIdx, setCurrentIdx] = useState(state?.currentGameIndex || 0);
   const [phase, setPhase] = useState<Phase>('playing');
-  const [players, setPlayers] = useState<PlayerData[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [isHost, setIsHost] = useState(false);
   const [advancing, setAdvancing] = useState(false);
+  const [autoAdvanceIn, setAutoAdvanceIn] = useState(0);
   const submittedRef = useRef(false);
+  const autoFiredRef = useRef(false);
 
   // Hydrate immediately and keep the entire arena synchronized. Realtime is
   // supplemented by a light polling fallback because browser/network sleep
-  // can drop a websocket event.
+  // can drop a websocket event. Polling is paused while the tab is hidden.
   useEffect(() => {
     let disposed = false;
     const sync = async () => {
@@ -102,16 +64,28 @@ export default function MultiplayerArenaPage() {
             setPhase('playing');
           }
         }
-      } catch {}
+      } catch (error) {
+        console.warn('[arena] state sync failed', errorMessage(error));
+      }
     };
     void sync();
-    if (!roomId) return () => { disposed = true; };
+    if (!roomId)
+      return () => {
+        disposed = true;
+      };
     const unsubscribe = subscribeToRoom(roomId, sync);
-    const pollTimer = window.setInterval(sync, 3000);
+    const pollTimer = window.setInterval(() => {
+      if (!document.hidden) void sync();
+    }, 3000);
+    const onVisible = () => {
+      if (!document.hidden) void sync();
+    };
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
       disposed = true;
       unsubscribe();
       window.clearInterval(pollTimer);
+      document.removeEventListener('visibilitychange', onVisible);
     };
   }, [roomId, playerId]);
 
@@ -122,34 +96,69 @@ export default function MultiplayerArenaPage() {
     }
   }, [phase, navigate, roomId]);
 
-  const handleGameComplete = useCallback(async (score: number, timeTakenMs: number) => {
-    if (submittedRef.current) return;
-    submittedRef.current = true;
-    const gameId = gameIDs[currentIdx];
-    try {
-      const result = await submitScore({ roomId, playerId, playerToken, gameId, score, timeTakenMs });
-      if (result.allDone && result.isLastGame) {
-        setPhase('finished');
-      } else {
-        // The server changes the room to Between Games only after all
-        // players submit. The realtime/polling sync above moves everyone to
-        // the interstitial from that authoritative state.
-        setPhase(result.allDone ? 'between' : 'waiting');
-      }
-    } catch (error: any) {
-      // A failed submission must be retryable. Do not strand the player in
-      // the waiting screen with a permanently set submitted flag.
-      submittedRef.current = false;
-      setPhase('playing');
-      toast.error(error?.message || 'Could not submit your score. Please try again.');
+  // Auto-advance: after every player finishes, the server waits a short grace
+  // period then lets any player move the room to the next game. We count down
+  // client-side so the scoreboard doesn't stall when the host closes their tab.
+  // Attempts repeat once the grace period elapses until the room actually moves.
+  const AUTO_ADVANCE_GRACE_MS = 16000;
+  useEffect(() => {
+    if (phase !== 'between') {
+      autoFiredRef.current = false;
+      setAutoAdvanceIn(0);
+      return;
     }
-  }, [roomId, playerId, gameIDs, currentIdx]);
+    autoFiredRef.current = false;
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      setAutoAdvanceIn(Math.max(0, Math.ceil((AUTO_ADVANCE_GRACE_MS - elapsed) / 1000)));
+      if (elapsed < AUTO_ADVANCE_GRACE_MS || autoFiredRef.current) return;
+      autoFiredRef.current = true;
+      void autoAdvanceRoom({ roomId, playerId, playerToken })
+        .then(result => {
+          if (!result.advanced) autoFiredRef.current = false;
+        })
+        .catch(() => {
+          autoFiredRef.current = false;
+        });
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [phase, roomId, playerId, playerToken]);
+
+  const handleGameComplete = useCallback(
+    async (score: number, timeTakenMs: number) => {
+      if (submittedRef.current) return;
+      submittedRef.current = true;
+      const gameId = gameIDs[currentIdx];
+      const safeScore = Math.max(0, Math.min(Math.round(score), MAX_ARENA_SCORE));
+      try {
+        const result = await submitScore({ roomId, playerId, playerToken, gameId, score: safeScore, timeTakenMs });
+        if (result.allDone && result.isLastGame) {
+          setPhase('finished');
+        } else {
+          // The server changes the room to Between Games only after all
+          // players submit. The realtime/polling sync above moves everyone to
+          // the interstitial from that authoritative state.
+          setPhase(result.allDone ? 'between' : 'waiting');
+        }
+      } catch (error) {
+        // A failed submission must be retryable. Do not strand the player in
+        // the waiting screen with a permanently set submitted flag.
+        submittedRef.current = false;
+        setPhase('playing');
+        toast.error(errorMessage(error));
+      }
+    },
+    [roomId, playerId, playerToken, gameIDs, currentIdx],
+  );
 
   const handleAdvance = async () => {
     setAdvancing(true);
     try {
       await advanceGame({ roomId, playerId, playerToken });
-    } catch {}
+    } catch (error) {
+      console.warn('[arena] advance failed', errorMessage(error));
+    }
     setAdvancing(false);
   };
 
@@ -163,22 +172,40 @@ export default function MultiplayerArenaPage() {
     const donePlayers = players.filter(p => p.gameDone);
     const totalPlayers = players.length;
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center space-y-4 max-w-sm w-full">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-brand-a/[0.12] via-transparent to-brand-c/[0.12] blur-3xl" />
+        <div className="relative w-full max-w-sm space-y-5 text-center">
+          <div className="relative mx-auto h-16 w-16">
+            <div className="absolute inset-0 rounded-full bg-primary/25 blur-xl" />
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-card/80 backdrop-blur-md">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
           </div>
-          <h2 className="text-2xl font-black">Waiting for others...</h2>
-          <p className="text-muted-foreground">{donePlayers.length}/{totalPlayers} players finished</p>
+          <div>
+            <h2 className="font-display text-2xl font-bold tracking-tight">Waiting for others...</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {donePlayers.length}/{totalPlayers} players finished
+            </p>
+          </div>
           <div className="space-y-2">
-            {players.map(p => (
-              <div key={p.id} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border">
-                <span className="flex-1 text-sm font-semibold text-left">{p.name}</span>
-                <span className={`text-xs font-bold ${p.gameDone || p.id === playerId ? 'text-green-600' : 'text-muted-foreground'}`}>
-                   {p.gameDone ? '✓ Done' : '⏳ Playing'}
-                </span>
-              </div>
-            ))}
+            {players.map(p => {
+              const isDone = p.gameDone || p.id === playerId;
+              return (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-3 rounded-xl border border-border/60 bg-card/70 px-4 py-2.5 backdrop-blur-md"
+                >
+                  <span className="flex-1 text-left text-sm font-semibold">{p.name}</span>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                      isDone ? 'bg-chart-1/15 text-chart-1' : 'bg-secondary text-muted-foreground animate-pulse-soft'
+                    }`}
+                  >
+                    {isDone ? 'Done' : 'Playing'}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -201,6 +228,7 @@ export default function MultiplayerArenaPage() {
         advancing={advancing}
         onAdvance={handleAdvance}
         currentPlayerId={playerId}
+        autoAdvanceIn={autoAdvanceIn}
       />
     );
   }
@@ -208,7 +236,7 @@ export default function MultiplayerArenaPage() {
   // Playing a game
   const currentGameId = gameIDs[currentIdx];
   const mode = getGameMode(currentGameId);
-  const GameComponent = currentGameId ? GAME_COMPONENTS[currentGameId] : undefined;
+  const GameComponent = currentGameId ? getGameComponent(currentGameId) : undefined;
 
   if (!mode || !GameComponent) {
     navigate('/');
@@ -217,6 +245,11 @@ export default function MultiplayerArenaPage() {
 
   const myTotalScore = players.find(p => p.id === playerId)?.totalScore || 0;
 
+  // Scribble is a shared draw-and-guess game, not a solo timer round.
+  if (currentGameId === 'scribble') {
+    return <ScribbleArenaGame roomId={roomId} playerId={playerId} playerToken={playerToken} />;
+  }
+
   return (
     <GameShell
       key={`${currentGameId}-${currentIdx}`}
@@ -224,7 +257,18 @@ export default function MultiplayerArenaPage() {
       onComplete={handleGameComplete}
       arenaProgress={{ current: currentIdx + 1, total: gameIDs.length, totalScore: myTotalScore }}
     >
-      {(ctx) => <GameComponent {...ctx} />}
+      {ctx => (
+        <Suspense
+          fallback={
+            <div className="flex flex-col items-center gap-3 py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Loading game...</p>
+            </div>
+          }
+        >
+          <GameComponent {...(ctx as GameContext)} />
+        </Suspense>
+      )}
     </GameShell>
   );
 }

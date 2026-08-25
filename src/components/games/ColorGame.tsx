@@ -17,7 +17,7 @@ function pick(arr: typeof COLORS, exclude?: string) {
   return filtered[Math.floor(Math.random() * filtered.length)];
 }
 
-export default function ColorGame({ round, addScore, nextRound }: GameContext) {
+export default function ColorGame({ round, addScore, reportWrong, nextRound }: GameContext) {
   const [target, setTarget] = useState(() => pick(COLORS));
   const [options, setOptions] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -35,6 +35,7 @@ export default function ColorGame({ round, addScore, nextRound }: GameContext) {
     if (feedback) return;
     const correct = name === target.name;
     if (correct) addScore(100);
+    else reportWrong();
     setFeedback(correct ? '✓ Correct!' : `✗ It was ${target.name}`);
     setTimeout(nextRound, 800);
   };
@@ -45,12 +46,18 @@ export default function ColorGame({ round, addScore, nextRound }: GameContext) {
       <p className="font-semibold text-lg">What color is this?</p>
       <div className="grid grid-cols-2 gap-3 w-full">
         {options.map(o => (
-          <button key={o} onClick={() => handleAnswer(o)} className="p-4 rounded-xl border bg-card font-bold hover:border-primary transition-all text-sm">
+          <button
+            key={o}
+            onClick={() => handleAnswer(o)}
+            className="p-4 rounded-xl border bg-card font-bold hover:border-primary transition-all text-sm"
+          >
             {o}
           </button>
         ))}
       </div>
-      {feedback && <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>}
+      {feedback && (
+        <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>
+      )}
     </div>
   );
 }

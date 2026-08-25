@@ -37,7 +37,11 @@ export default function WhackGame({ round, addScore }: GameContext) {
             onClick={() => whack(index)}
             className={`w-20 h-20 rounded-2xl border-2 transition-all ${index === activeSpot ? 'bg-amber-400/20 border-amber-400 scale-110 shadow-lg' : 'bg-card border-border/60 hover:border-primary/40'}`}
           >
-            {index === activeSpot ? <span className="text-4xl">🐹</span> : <span className="text-2xl opacity-20">•</span>}
+            {index === activeSpot ? (
+              <span className="text-4xl">🐹</span>
+            ) : (
+              <span className="text-2xl opacity-20">•</span>
+            )}
           </button>
         ))}
       </div>

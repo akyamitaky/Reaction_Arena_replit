@@ -14,7 +14,7 @@ function generate(round: number) {
   return items;
 }
 
-export default function MemoryGame({ round, addScore, nextRound }: GameContext) {
+export default function MemoryGame({ round, addScore, reportWrong, nextRound }: GameContext) {
   const [items, setItems] = useState<string[]>([]);
   const [phase, setPhase] = useState<'show' | 'pick' | 'done'>('show');
   const [options, setOptions] = useState<string[]>([]);
@@ -28,12 +28,15 @@ export default function MemoryGame({ round, addScore, nextRound }: GameContext) 
     setSelected([]);
     setFeedback('');
 
-    const timer = setTimeout(() => {
-      const pool = new Set(seq);
-      while (pool.size < Math.min(seq.length + 4, 10)) pool.add(ITEMS[Math.floor(Math.random() * ITEMS.length)]);
-      setOptions([...pool].sort(() => Math.random() - 0.5));
-      setPhase('pick');
-    }, seq.length * 800 + 500);
+    const timer = setTimeout(
+      () => {
+        const pool = new Set(seq);
+        while (pool.size < Math.min(seq.length + 4, 10)) pool.add(ITEMS[Math.floor(Math.random() * ITEMS.length)]);
+        setOptions([...pool].sort(() => Math.random() - 0.5));
+        setPhase('pick');
+      },
+      seq.length * 800 + 500,
+    );
 
     return () => clearTimeout(timer);
   }, [round]);
@@ -44,6 +47,7 @@ export default function MemoryGame({ round, addScore, nextRound }: GameContext) 
     setSelected(next);
 
     if (!items.includes(emoji)) {
+      reportWrong();
       setFeedback('✗ Wrong pick!');
       setPhase('done');
       setTimeout(nextRound, 1000);
@@ -62,16 +66,28 @@ export default function MemoryGame({ round, addScore, nextRound }: GameContext) 
       {phase === 'show' && (
         <>
           <p className="text-sm text-muted-foreground">Remember these!</p>
-          <div className="flex gap-3">{items.map((e, i) => <span key={i} className="text-4xl animate-pulse">{e}</span>)}</div>
+          <div className="flex gap-3">
+            {items.map((e, i) => (
+              <span key={i} className="text-4xl animate-pulse">
+                {e}
+              </span>
+            ))}
+          </div>
         </>
       )}
       {(phase === 'pick' || phase === 'done') && (
         <>
-          <p className="text-sm text-muted-foreground">{phase === 'pick' ? `Pick the ${items.length} you saw:` : feedback}</p>
+          <p aria-live="polite" className="text-sm text-muted-foreground">
+            {phase === 'pick' ? `Pick the ${items.length} you saw:` : feedback}
+          </p>
           <div className="flex flex-wrap gap-2 justify-center">
             {options.map(e => (
-              <button key={e} onClick={() => handlePick(e)} disabled={selected.includes(e)}
-                className={`w-14 h-14 rounded-xl border flex items-center justify-center text-2xl transition-all ${selected.includes(e) ? (items.includes(e) ? 'bg-green-500/20 border-green-500' : 'bg-destructive/20 border-destructive') : 'bg-card hover:scale-110'}`}>
+              <button
+                key={e}
+                onClick={() => handlePick(e)}
+                disabled={selected.includes(e)}
+                className={`w-14 h-14 rounded-xl border flex items-center justify-center text-2xl transition-all ${selected.includes(e) ? (items.includes(e) ? 'bg-green-500/20 border-green-500' : 'bg-destructive/20 border-destructive') : 'bg-card hover:scale-110'}`}
+              >
                 {e}
               </button>
             ))}

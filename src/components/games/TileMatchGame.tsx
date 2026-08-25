@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { GameContext } from '@/components/GameShell';
+import { MAX_ARENA_SCORE } from '@/lib/gameConstants';
 
 const EMOJIS = ['🍎', '🍌', '🍇', '🌟', '🔥', '💎', '🌈', '🎯'];
 
@@ -21,7 +22,7 @@ export default function TileMatchGame({ addScore, nextRound }: GameContext) {
   useEffect(() => {
     if (matches === 6 && !doneRef.current) {
       doneRef.current = true;
-      addScore(300);
+      addScore(MAX_ARENA_SCORE);
       setTimeout(nextRound, 1000);
     }
   }, [matches]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -34,12 +35,15 @@ export default function TileMatchGame({ addScore, nextRound }: GameContext) {
     if (next.length === 2) {
       setLocked(true);
       if (cards[next[0]].emoji === cards[next[1]].emoji) {
-        setCards(prev => prev.map((c, i) => next.includes(i) ? { ...c, matched: true } : c));
+        setCards(prev => prev.map((c, i) => (next.includes(i) ? { ...c, matched: true } : c)));
         setMatches(m => m + 1);
         setFlipped([]);
         setLocked(false);
       } else {
-        setTimeout(() => { setFlipped([]); setLocked(false); }, 600);
+        setTimeout(() => {
+          setFlipped([]);
+          setLocked(false);
+        }, 600);
       }
     }
   };

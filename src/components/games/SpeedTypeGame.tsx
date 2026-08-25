@@ -1,11 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { GameContext } from '@/components/GameShell';
+import { MAX_ARENA_SCORE } from '@/lib/gameConstants';
 
 const PHRASES = [
-  'the quick brown fox', 'pack my box with five', 'how vexingly quick', 'the five boxing wizards',
-  'bright vixens jump', 'crazy Frederick bought', 'jived fox nymph grabs', 'quick wafting zephyrs',
-  'sphinx of black quartz', 'two driven jocks help', 'five quacking zephyrs', 'the jay pig fox zebra',
-  'jump by vow of quick', 'few quips jolt my wax', 'brick quiz whangs jumpy',
+  'the quick brown fox',
+  'pack my box with five',
+  'how vexingly quick',
+  'the five boxing wizards',
+  'bright vixens jump',
+  'crazy Frederick bought',
+  'jived fox nymph grabs',
+  'quick wafting zephyrs',
+  'sphinx of black quartz',
+  'two driven jocks help',
+  'five quacking zephyrs',
+  'the jay pig fox zebra',
+  'jump by vow of quick',
+  'few quips jolt my wax',
+  'brick quiz whangs jumpy',
 ];
 
 export default function SpeedTypeGame({ round, addScore, nextRound }: GameContext) {
@@ -28,7 +40,7 @@ export default function SpeedTypeGame({ round, addScore, nextRound }: GameContex
     if (val.toLowerCase() === phrase.toLowerCase()) {
       const ms = Date.now() - startTime.current;
       const wpm = Math.round((phrase.split(' ').length / (ms / 1000)) * 60);
-      addScore(Math.min(300, wpm * 3));
+      addScore(Math.min(MAX_ARENA_SCORE, wpm * 3));
       setDone(true);
       setTimeout(nextRound, 1200);
     }
@@ -39,7 +51,16 @@ export default function SpeedTypeGame({ round, addScore, nextRound }: GameContex
       <p className="text-sm text-muted-foreground">Type the phrase below as fast as you can:</p>
       <div className="text-2xl font-mono tracking-wide text-center">
         {phrase.split('').map((ch, i) => (
-          <span key={i} className={i < input.length ? (input[i]?.toLowerCase() === ch.toLowerCase() ? 'text-green-600' : 'text-destructive') : 'text-muted-foreground/40'}>
+          <span
+            key={i}
+            className={
+              i < input.length
+                ? input[i]?.toLowerCase() === ch.toLowerCase()
+                  ? 'text-green-600'
+                  : 'text-destructive'
+                : 'text-muted-foreground/40'
+            }
+          >
             {ch}
           </span>
         ))}
@@ -47,11 +68,16 @@ export default function SpeedTypeGame({ round, addScore, nextRound }: GameContex
       <input
         value={input}
         onChange={e => handleChange(e.target.value)}
+        aria-label="Type the phrase shown above"
         className="w-full text-center text-xl font-mono p-3 rounded-xl border bg-card outline-none focus:border-primary transition-colors"
         placeholder="Start typing..."
         autoFocus
       />
-      {done && <p className="font-bold text-green-600">Done! 🎉</p>}
+      {done && (
+        <p aria-live="polite" className="font-bold text-green-600">
+          Done!
+        </p>
+      )}
     </div>
   );
 }

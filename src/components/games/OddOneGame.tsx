@@ -21,16 +21,20 @@ function generate() {
   return { options, answer: g.odd, hint: g.category };
 }
 
-export default function OddOneGame({ round, addScore, nextRound }: GameContext) {
+export default function OddOneGame({ round, addScore, reportWrong, nextRound }: GameContext) {
   const [q, setQ] = useState(() => generate());
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  useEffect(() => { setQ(generate()); setFeedback(null); }, [round]);
+  useEffect(() => {
+    setQ(generate());
+    setFeedback(null);
+  }, [round]);
 
   const handleAnswer = (ans: string) => {
     if (feedback) return;
     const correct = ans === q.answer;
     if (correct) addScore(100);
+    else reportWrong();
     setFeedback(correct ? '✓ Correct!' : `✗ It was "${q.answer}"`);
     setTimeout(nextRound, 800);
   };
@@ -40,10 +44,18 @@ export default function OddOneGame({ round, addScore, nextRound }: GameContext) 
       <p className="text-sm text-muted-foreground">Which one doesn't belong?</p>
       <div className="grid grid-cols-2 gap-3 w-full">
         {q.options.map(o => (
-          <button key={o} onClick={() => handleAnswer(o)} className="p-5 rounded-xl border bg-card font-bold hover:border-primary transition-all">{o}</button>
+          <button
+            key={o}
+            onClick={() => handleAnswer(o)}
+            className="p-5 rounded-xl border bg-card font-bold hover:border-primary transition-all"
+          >
+            {o}
+          </button>
         ))}
       </div>
-      {feedback && <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>}
+      {feedback && (
+        <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>
+      )}
     </div>
   );
 }

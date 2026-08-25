@@ -16,7 +16,7 @@ const PUZZLES = [
   { emojis: '🌊🏄', answer: 'Surfing', options: ['Swimming', 'Surfing', 'Fishing', 'Boat Trip'] },
 ];
 
-export default function EmojiTalkGame({ round, addScore, nextRound }: GameContext) {
+export default function EmojiTalkGame({ round, addScore, reportWrong, nextRound }: GameContext) {
   const [q, setQ] = useState(() => PUZZLES[0]);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -29,6 +29,7 @@ export default function EmojiTalkGame({ round, addScore, nextRound }: GameContex
     if (feedback) return;
     const correct = ans === q.answer;
     if (correct) addScore(100);
+    else reportWrong();
     setFeedback(correct ? '✓ Correct!' : `✗ It was "${q.answer}"`);
     setTimeout(nextRound, 1000);
   };
@@ -39,10 +40,18 @@ export default function EmojiTalkGame({ round, addScore, nextRound }: GameContex
       <p className="text-7xl">{q.emojis}</p>
       <div className="grid grid-cols-2 gap-3 w-full">
         {q.options.map(o => (
-          <button key={o} onClick={() => handleAnswer(o)} className="p-4 rounded-xl border bg-card font-semibold text-sm hover:border-primary transition-all">{o}</button>
+          <button
+            key={o}
+            onClick={() => handleAnswer(o)}
+            className="p-4 rounded-xl border bg-card font-semibold text-sm hover:border-primary transition-all"
+          >
+            {o}
+          </button>
         ))}
       </div>
-      {feedback && <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>}
+      {feedback && (
+        <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>
+      )}
     </div>
   );
 }

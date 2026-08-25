@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { GameContext } from '@/components/GameShell';
+import { MAX_ARENA_SCORE } from '@/lib/gameConstants';
 
 type Phase = 'waiting' | 'ready' | 'go' | 'result' | 'early';
 
@@ -27,7 +28,7 @@ export default function ReflexGame({ addScore, nextRound }: GameContext) {
     } else if (phase === 'go') {
       const ms = Date.now() - goTime.current;
       setReactionTime(ms);
-      const pts = Math.max(0, Math.round(300 - ms));
+      const pts = Math.max(0, Math.round(MAX_ARENA_SCORE - ms));
       addScore(pts);
       setPhase('result');
       setTimeout(nextRound, 1200);
@@ -37,19 +38,51 @@ export default function ReflexGame({ addScore, nextRound }: GameContext) {
   return (
     <button
       onClick={handleTap}
+      aria-label="Reflex game. Click when the circle turns green."
+      aria-live="assertive"
       className={`w-full max-w-md h-64 rounded-3xl flex flex-col items-center justify-center gap-3 text-2xl font-black transition-all ${
-        phase === 'ready' ? 'bg-destructive/20 text-destructive' :
-        phase === 'go' ? 'bg-green-500/20 text-green-600' :
-        phase === 'early' ? 'bg-destructive/10 text-destructive' :
-        phase === 'result' ? 'bg-primary/10 text-primary' :
-        'bg-muted'
+        phase === 'ready'
+          ? 'bg-destructive/20 text-destructive'
+          : phase === 'go'
+            ? 'bg-green-500/20 text-green-600'
+            : phase === 'early'
+              ? 'bg-destructive/10 text-destructive'
+              : phase === 'result'
+                ? 'bg-primary/10 text-primary'
+                : 'bg-muted'
       }`}
     >
       {phase === 'waiting' && 'Get ready...'}
-      {phase === 'ready' && <><span className="text-4xl">🔴</span><span>Wait for green...</span></>}
-      {phase === 'go' && <><span className="text-4xl">🟢</span><span>TAP NOW!</span></>}
-      {phase === 'early' && <><span>Too early! 😅</span><span className="text-lg font-normal">Wait for the green circle</span></>}
-      {phase === 'result' && <><span>{reactionTime}ms</span><span className="text-lg font-normal">{reactionTime < 200 ? 'Lightning fast! ⚡' : reactionTime < 350 ? 'Great reflexes! 🔥' : 'Keep practicing! 💪'}</span></>}
+      {phase === 'ready' && (
+        <>
+          <span className="text-4xl">🔴</span>
+          <span>Wait for green...</span>
+        </>
+      )}
+      {phase === 'go' && (
+        <>
+          <span className="text-4xl">🟢</span>
+          <span>TAP NOW!</span>
+        </>
+      )}
+      {phase === 'early' && (
+        <>
+          <span>Too early! 😅</span>
+          <span className="text-lg font-normal">Wait for the green circle</span>
+        </>
+      )}
+      {phase === 'result' && (
+        <>
+          <span>{reactionTime}ms</span>
+          <span className="text-lg font-normal">
+            {reactionTime < 200
+              ? 'Lightning fast! ⚡'
+              : reactionTime < 350
+                ? 'Great reflexes! 🔥'
+                : 'Keep practicing! 💪'}
+          </span>
+        </>
+      )}
     </button>
   );
 }

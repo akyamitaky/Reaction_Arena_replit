@@ -43,7 +43,9 @@ export default function TreasureGame({ round, addScore, nextRound }: GameContext
             className={`w-24 h-28 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${chosen === index ? 'bg-primary/15 border-primary scale-105' : 'bg-card border-border hover:-translate-y-2 hover:border-primary'}`}
           >
             <span className="text-4xl">{chosen === index ? chest.emoji : '🎁'}</span>
-            {chosen === index && <span className="text-xs font-black">{chest.points ? `+${chest.points}` : 'Empty!'}</span>}
+            {chosen === index && (
+              <span className="text-xs font-black">{chest.points ? `+${chest.points}` : 'Empty!'}</span>
+            )}
           </button>
         ))}
       </div>

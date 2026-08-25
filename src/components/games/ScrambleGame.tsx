@@ -3,7 +3,33 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { GameContext } from '@/components/GameShell';
 
-const WORDS = ['planet', 'rocket', 'garden', 'silver', 'monkey', 'castle', 'dragon', 'sunset', 'forest', 'bridge', 'puzzle', 'bottle', 'candle', 'dinner', 'engine', 'flower', 'guitar', 'hammer', 'island', 'jungle', 'kitten', 'laptop', 'mirror', 'needle', 'orange'];
+const WORDS = [
+  'planet',
+  'rocket',
+  'garden',
+  'silver',
+  'monkey',
+  'castle',
+  'dragon',
+  'sunset',
+  'forest',
+  'bridge',
+  'puzzle',
+  'bottle',
+  'candle',
+  'dinner',
+  'engine',
+  'flower',
+  'guitar',
+  'hammer',
+  'island',
+  'jungle',
+  'kitten',
+  'laptop',
+  'mirror',
+  'needle',
+  'orange',
+];
 
 function scramble(word: string): string {
   const arr = word.split('');
@@ -14,7 +40,7 @@ function scramble(word: string): string {
   return arr.join('') === word ? scramble(word) : arr.join('');
 }
 
-export default function ScrambleGame({ round, addScore, nextRound }: GameContext) {
+export default function ScrambleGame({ round, addScore, reportWrong, nextRound }: GameContext) {
   const [word, setWord] = useState('');
   const [scrambled, setScrambled] = useState('');
   const [input, setInput] = useState('');
@@ -32,6 +58,7 @@ export default function ScrambleGame({ round, addScore, nextRound }: GameContext
     if (feedback) return;
     const correct = input.toLowerCase().trim() === word;
     if (correct) addScore(150);
+    else reportWrong();
     setFeedback(correct ? '✓ Correct!' : `✗ Answer: ${word}`);
     setTimeout(nextRound, 1000);
   };
@@ -41,12 +68,28 @@ export default function ScrambleGame({ round, addScore, nextRound }: GameContext
       <p className="text-sm text-muted-foreground">Unscramble this word:</p>
       <div className="flex gap-2">
         {scrambled.split('').map((ch, i) => (
-          <span key={i} className="w-10 h-12 flex items-center justify-center rounded-lg bg-secondary font-black text-xl uppercase">{ch}</span>
+          <span
+            key={i}
+            className="w-10 h-12 flex items-center justify-center rounded-lg bg-secondary font-black text-xl uppercase"
+          >
+            {ch}
+          </span>
         ))}
       </div>
-      <Input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSubmit()} placeholder="Your answer..." className="text-center text-xl" autoFocus />
-      <Button onClick={handleSubmit} disabled={!input.trim()} className="w-full">Submit</Button>
-      {feedback && <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>}
+      <Input
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+        placeholder="Your answer..."
+        className="text-center text-xl"
+        autoFocus
+      />
+      <Button onClick={handleSubmit} disabled={!input.trim()} className="w-full">
+        Submit
+      </Button>
+      {feedback && (
+        <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>
+      )}
     </div>
   );
 }

@@ -29,7 +29,7 @@ function ShapeIcon({ shape, size = 'large' }: { shape: Shape; size?: 'small' | '
   );
 }
 
-export default function ShapeMatchGame({ round, addScore, nextRound }: GameContext) {
+export default function ShapeMatchGame({ round, addScore, reportWrong, nextRound }: GameContext) {
   const [question, setQuestion] = useState(generate);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -42,6 +42,7 @@ export default function ShapeMatchGame({ round, addScore, nextRound }: GameConte
     if (feedback) return;
     const correct = id === question.target.id;
     if (correct) addScore(100);
+    else reportWrong();
     setFeedback(correct ? '✓ Perfect match!' : '✗ Try the next one!');
     setTimeout(nextRound, 750);
   };
@@ -64,7 +65,9 @@ export default function ShapeMatchGame({ round, addScore, nextRound }: GameConte
           </button>
         ))}
       </div>
-      {feedback && <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>}
+      {feedback && (
+        <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>
+      )}
     </div>
   );
 }

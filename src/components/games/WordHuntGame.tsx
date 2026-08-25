@@ -46,7 +46,9 @@ export default function WordHuntGame({ round, addScore, nextRound }: GameContext
 
   return (
     <div className="flex flex-col items-center gap-5 w-full max-w-sm">
-      <p className="text-sm text-muted-foreground">Find the word: <span className="font-black tracking-widest text-foreground">{question.word}</span></p>
+      <p className="text-sm text-muted-foreground">
+        Find the word: <span className="font-black tracking-widest text-foreground">{question.word}</span>
+      </p>
       <div className="grid grid-cols-5 gap-2">
         {question.letters.map((letter, index) => (
           <button
@@ -58,7 +60,9 @@ export default function WordHuntGame({ round, addScore, nextRound }: GameContext
           </button>
         ))}
       </div>
-      {feedback && <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>}
+      {feedback && (
+        <p className={`font-bold ${feedback.startsWith('✓') ? 'text-green-600' : 'text-destructive'}`}>{feedback}</p>
+      )}
     </div>
   );
 }

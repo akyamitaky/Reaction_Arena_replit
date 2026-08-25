@@ -13,12 +13,13 @@ function outcome(player: string, bot: string) {
     (player === 'rock' && bot === 'scissors') ||
     (player === 'paper' && bot === 'rock') ||
     (player === 'scissors' && bot === 'paper')
-  ) return 'win';
+  )
+    return 'win';
   return 'lose';
 }
 
-export default function DuelGame({ round, addScore, nextRound }: GameContext) {
-  const [botMove, setBotMove] = useState<typeof MOVES[number] | null>(null);
+export default function DuelGame({ round, addScore, reportWrong, nextRound }: GameContext) {
+  const [botMove, setBotMove] = useState<(typeof MOVES)[number] | null>(null);
   const [result, setResult] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,13 +27,14 @@ export default function DuelGame({ round, addScore, nextRound }: GameContext) {
     setResult(null);
   }, [round]);
 
-  const chooseMove = (move: typeof MOVES[number]) => {
+  const chooseMove = (move: (typeof MOVES)[number]) => {
     if (botMove) return;
     const opponent = MOVES[Math.floor(Math.random() * MOVES.length)];
     const gameResult = outcome(move.id, opponent.id);
     setBotMove(opponent);
     if (gameResult === 'win') addScore(150);
     if (gameResult === 'tie') addScore(50);
+    if (gameResult === 'lose') reportWrong();
     setResult(gameResult === 'win' ? '🏆 You win!' : gameResult === 'tie' ? '🤝 Tie!' : '💪 Next round!');
     setTimeout(nextRound, 1000);
   };

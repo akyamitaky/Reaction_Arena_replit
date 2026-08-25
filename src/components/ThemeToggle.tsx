@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { storage } from '@/lib/storage';
 
 export default function ThemeToggle() {
   const [dark, setDark] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem('reaction-theme');
+    const stored = storage.getTheme();
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = stored ? stored === 'dark' : prefersDark;
+    const isDark = stored === 'dark' || (!stored && prefersDark);
     setDark(isDark);
     document.documentElement.classList.toggle('light', !isDark);
   }, []);
@@ -16,7 +17,7 @@ export default function ThemeToggle() {
   const toggle = () => {
     const next = !dark;
     setDark(next);
-    localStorage.setItem('reaction-theme', next ? 'dark' : 'light');
+    storage.setTheme(next ? 'dark' : 'light');
     document.documentElement.classList.toggle('light', !next);
   };
 

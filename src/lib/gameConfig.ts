@@ -2,7 +2,8 @@ import {
   Eye, Brain, Calculator, Zap, Shuffle, Hash,
   Target, Puzzle, Timer, Users, Type, Search, Link2, CircleHelp,
   MessageCircle, CircleCheckBig, Palette, Keyboard, Grid3x3, Pencil,
-  Lightbulb,
+  Lightbulb, TrendingUp, AudioLines, SortAsc, Droplets, Clock3,
+  Landmark, FlipHorizontal2, SpellCheck,
 } from 'lucide-react';
 
 export interface GameMode {
@@ -43,6 +44,14 @@ export const gameModes: GameMode[] = [
   { id: 'whack', label: 'Whack Attack', icon: Zap, color: 'text-chart-1', description: 'Whack fast for room points', rounds: 5, timePerRound: 10 },
   { id: 'treasure', label: 'Treasure Pick', icon: Target, color: 'text-chart-3', description: 'Risk it for the jackpot', rounds: 8, timePerRound: 8 },
   { id: 'duel', label: 'Emoji Duel', icon: Users, color: 'text-chart-5', description: 'Beat the room with rock, paper, scissors', rounds: 8, timePerRound: 8 },
+  { id: 'series', label: 'Series', icon: TrendingUp, color: 'text-chart-1', description: 'Find the next number in the series', rounds: 8, timePerRound: 10 },
+  { id: 'vowels', label: 'Vowel Count', icon: AudioLines, color: 'text-chart-2', description: 'Count the vowels in the word', rounds: 8, timePerRound: 8 },
+  { id: 'alpha', label: 'Alphabet', icon: SortAsc, color: 'text-chart-3', description: 'Pick the word that comes first alphabetically', rounds: 8, timePerRound: 8 },
+  { id: 'colormix', label: 'Color Mix', icon: Droplets, color: 'text-chart-4', description: 'Guess the color you get from mixing', rounds: 8, timePerRound: 6 },
+  { id: 'clock', label: 'Clock', icon: Clock3, color: 'text-chart-5', description: 'Read the time on the analog clock', rounds: 8, timePerRound: 8 },
+  { id: 'roman', label: 'Roman', icon: Landmark, color: 'text-chart-1', description: 'Translate Roman numerals', rounds: 8, timePerRound: 10 },
+  { id: 'palindrome', label: 'Palindrome', icon: FlipHorizontal2, color: 'text-chart-2', description: 'Is the word a palindrome?', rounds: 10, timePerRound: 5 },
+  { id: 'spelling', label: 'Spelling', icon: SpellCheck, color: 'text-chart-3', description: 'Pick the correctly spelled word', rounds: 8, timePerRound: 8 },
 ];
 
 export function getGameMode(id: string) {

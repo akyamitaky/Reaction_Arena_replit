@@ -24,6 +24,12 @@ const tailwindConfig: Config = {
           "\"Segoe UI Symbol\"",
           "\"Noto Color Emoji\""
         ],
+        "display": [
+          "var(--font-display)",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif"
+        ],
         "mono": [
           "var(--font-mono)",
           "ui-monospace",
@@ -70,6 +76,11 @@ const tailwindConfig: Config = {
           "DEFAULT": "hsl(var(--card))",
           "foreground": "hsl(var(--card-foreground))"
         },
+        "brand": {
+          "a": "hsl(var(--brand-a))",
+          "b": "hsl(var(--brand-b))",
+          "c": "hsl(var(--brand-c))"
+        },
         "sidebar": {
           "DEFAULT": "hsl(var(--sidebar-background))",
           "foreground": "hsl(var(--sidebar-foreground))",
@@ -105,7 +116,34 @@ const tailwindConfig: Config = {
         "md": "var(--shadow-md)",
         "lg": "var(--shadow-lg)",
         "xl": "var(--shadow-xl)",
-        "2xl": "var(--shadow-2xl)"
+        "2xl": "var(--shadow-2xl)",
+        "glow": "0 0 0 1px hsl(var(--primary) / 0.35), 0 12px 40px -12px hsl(var(--brand-a) / 0.45)",
+        "glow-sm": "0 0 0 1px hsl(var(--primary) / 0.25), 0 6px 24px -8px hsl(var(--brand-a) / 0.4)"
+      },
+      "keyframes": {
+        "shimmer": {
+          "0%": { "background-position": "-200% 0" },
+          "100%": { "background-position": "200% 0" }
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" }
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.55" }
+        },
+        "aurora": {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)", opacity: "0.7" },
+          "33%": { transform: "translate(4%, -6%) scale(1.06)", opacity: "0.9" },
+          "66%": { transform: "translate(-4%, 4%) scale(0.97)", opacity: "0.6" }
+        }
+      },
+      "animation": {
+        "shimmer": "shimmer 2.4s linear infinite",
+        "float": "float 6s ease-in-out infinite",
+        "pulse-soft": "pulse-soft 2.4s ease-in-out infinite",
+        "aurora": "aurora 14s ease-in-out infinite"
       }
     },
   },
