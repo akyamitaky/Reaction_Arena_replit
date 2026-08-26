@@ -1,0 +1,75 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+:root {
+  --background: 220 22% 5%;
+  --foreground: 210 25% 96%;
+  --muted: 220 16% 9%;
+  --muted-foreground: 217 13% 63%;
+  --popover: 220 22% 7%;
+  --popover-foreground: 210 25% 96%;
+  --border: 220 14% 14%;
+  --input: 220 14% 16%;
+  --card: 220 22% 7.5%;
+  --card-foreground: 210 25% 96%;
+  --primary: 166 72% 50%;
+  --primary-foreground: 220 30% 8%;
+  --secondary: 220 18% 12%;
+  --secondary-foreground: 210 25% 96%;
+  --accent: 34 92% 61%;
+  --accent-foreground: 220 30% 8%;
+  --destructive: 0 72% 58%;
+  --destructive-foreground: 210 25% 96%;
+  --ring: 166 72% 50%;
+  --brand-a: 166 72% 50%;
+  --brand-b: 191 74% 57%;
+  --brand-c: 258 84% 64%;
+  --radius: .75rem;
+  --chart-1: 166 72% 50%;
+  --chart-2: 258 84% 64%;
+  --chart-3: 191 74% 57%;
+  --chart-4: 34 92% 61%;
+  --chart-5: 9 82% 66%;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --shadow-color: #000;
+  --shadow-opacity: .35;
+  --sidebar-background: 220 22% 6%;
+  --sidebar-foreground: 210 25% 96%;
+  --sidebar-primary: 166 72% 50%;
+  --sidebar-primary-foreground: 220 30% 8%;
+  --sidebar-accent: 220 16% 11%;
+  --sidebar-accent-foreground: 210 25% 96%;
+  --sidebar-border: 220 14% 13%;
+  --sidebar-ring: 166 72% 50%;
+}
+
+.reaction-home {
+  font-family: var(--font-sans);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100vh;
+}
+.reaction-home h1, .reaction-home h2, .reaction-home h3 { font-family: var(--font-display); }
+.reaction-home .bg-grid {
+  background-image: linear-gradient(to right, hsl(var(--border)/.35) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)/.35) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 80%);
+}
+.reaction-home .text-gradient {
+  background: linear-gradient(100deg, hsl(var(--brand-a)), hsl(var(--brand-b)) 55%, hsl(var(--brand-c)));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.reaction-home .btn-primary-gradient { background: linear-gradient(135deg, hsl(var(--brand-a)), hsl(var(--brand-b))); }
+.reaction-home .glass { background: linear-gradient(160deg, hsl(var(--card)/.82), hsl(var(--card)/.55)); backdrop-filter: blur(16px); }
+.reaction-home.light {
+  --background: 210 30% 97%;
+  --foreground: 222 30% 10%;
+  --muted-foreground: 220 12% 40%;
+  --border: 216 18% 84%;
+  --input: 216 18% 82%;
+  --card: 0 0% 100%;
+  --primary: 166 68% 32%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 215 22% 92%;
+}
