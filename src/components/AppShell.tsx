@@ -16,6 +16,7 @@ const NAV_LINKS = [
 export default function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const hideNav =
+    pathname === '/' ||
     pathname === '/play' ||
     pathname.startsWith('/play/') ||
     pathname === '/arena' ||
