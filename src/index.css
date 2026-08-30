@@ -79,9 +79,42 @@
     --shadow-2xl: calc(var(--shadow-x) * 8) calc(var(--shadow-y) * 12) calc(max(0px, var(--shadow-blur) * 9 - 8px)) calc(var(--shadow-spread) - 12px) color-mix(in srgb, var(--shadow-color) calc(var(--shadow-opacity) * 250%), transparent);
     --shadow: var(--shadow-md);
 
+    /* Game color palette (used by color-based games via --c-* vars) */
+    --c-red: #ef4444;
+    --c-blue: #3b82f6;
+    --c-green: #22c55e;
+    --c-yellow: #eab308;
+    --c-purple: #a855f7;
+    --c-orange: #f97316;
+    --c-pink: #ec4899;
+    --c-cyan: #06b6d4;
+    --c-gray: #6b7280;
+    --c-light-blue: #38bdf8;
+    --c-white: #f8fafc;
+
     /* ============================================
        END THEME SYSTEM VARIABLES
        ============================================ */
+  }
+
+  /* Colorblind-safe palette (Okabe-Ito inspired). Applied via the
+     ColorblindToggle; swaps hues without changing any game logic. */
+  html[data-colorblind='on'] {
+    --c-red: #d55e00;
+    --c-blue: #0072b2;
+    --c-green: #009e73;
+    --c-yellow: #f0e442;
+    --c-purple: #cc79a7;
+    --c-orange: #e69f00;
+    --c-pink: #882255;
+    --c-cyan: #56b4e9;
+    --c-gray: #9aa0a6;
+    --c-light-blue: #80d0f0;
+
+    --destructive: 25 100% 42%;
+    --chart-1: 38 100% 47%;
+    --chart-2: 333 44% 64%;
+    --chart-3: 198 78% 63%;
   }
 
   .light {

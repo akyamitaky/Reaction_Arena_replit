@@ -1,9 +1,10 @@
 import { Suspense } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import GameShell from '@/components/GameShell';
 import { getGameMode } from '@/lib/gameConfig';
 import { getGameComponent } from '@/lib/gameRegistry';
-import { recordDaily } from '@/lib/dailyChallenge';
+import { recordDaily, STREAK_MILESTONES } from '@/lib/dailyChallenge';
 import { storage } from '@/lib/storage';
 import { syncDailyProgress } from '@/lib/profileApi';
 import { Loader2 } from 'lucide-react';
@@ -28,7 +29,13 @@ export default function GamePage() {
   const isDaily = new URLSearchParams(location.search).get('daily') === '1';
 
   const handleDailyComplete = (score: number) => {
-    recordDaily(score);
+    const streak = recordDaily(score);
+    for (const days of streak.justAwarded) {
+      const milestone = STREAK_MILESTONES.find(m => m.days === days);
+      if (milestone) {
+        toast(`${milestone.label} — +${milestone.xp} XP bonus!`, { description: 'Keep it going tomorrow.' });
+      }
+    }
     const pct = mode.rounds > 0 ? Math.round((score / (mode.rounds * 150)) * 100) : 0;
     storage.recordSoloGame(score, mode.id, pct);
     syncDailyProgress({ name: storage.getPlayerName() || 'Player', score, gameId: mode.id, pct });

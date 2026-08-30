@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { dailyGameId, getDailyStreak, recordDaily, utcDateKey, yesterdayKey } from '@/lib/dailyChallenge';
+import {
+  dailyGameId,
+  getDailyStreak,
+  recordDaily,
+  STREAK_MILESTONES,
+  utcDateKey,
+  yesterdayKey,
+} from '@/lib/dailyChallenge';
+import { storage } from '@/lib/storage';
 
 describe('dailyChallenge dates', () => {
   it('formats a UTC date key', () => {
@@ -68,5 +76,49 @@ describe('dailyChallenge streak', () => {
     const today = getDailyStreak('2026-08-19');
     expect(today.playedToday).toBe(false);
     expect(today.current).toBe(1);
+  });
+
+  it('records the play date in history and dedupes same-day replays', () => {
+    recordDaily(120, '2026-08-18');
+    recordDaily(60, '2026-08-18');
+    recordDaily(90, '2026-08-19');
+    const streak = getDailyStreak('2026-08-19');
+    expect(streak.history).toEqual(['2026-08-18', '2026-08-19']);
+  });
+
+  it('awards a one-time XP bonus when a streak milestone is reached', () => {
+    const xpBefore = storage.getXp();
+    let last: ReturnType<typeof recordDaily> | null = null;
+    for (let day = 18; day <= 20; day++) {
+      last = recordDaily(100, `2026-08-${day}`);
+    }
+    const streak = getDailyStreak('2026-08-20');
+    expect(streak.current).toBe(3);
+    expect(streak.awardedMilestones).toContain(3);
+    expect(last?.justAwarded).toContain(3);
+    const milestone = STREAK_MILESTONES.find(m => m.days === 3);
+    expect(storage.getXp()).toBe(xpBefore + (milestone?.xp ?? 0));
+  });
+
+  it('does not re-award a milestone that was already claimed', () => {
+    for (let day = 18; day <= 20; day++) {
+      recordDaily(100, `2026-08-${day}`);
+    }
+    const xpAfterThree = storage.getXp();
+    const again = recordDaily(100, '2026-08-20');
+    expect(again.justAwarded).not.toContain(3);
+    expect(storage.getXp()).toBe(xpAfterThree);
+  });
+
+  it('awards a single XP bonus once across milestones (3 then 7)', () => {
+    const xpBefore = storage.getXp();
+    for (let day = 10; day <= 16; day++) {
+      recordDaily(100, `2026-08-${String(day).padStart(2, '0')}`);
+    }
+    const streak = getDailyStreak('2026-08-16');
+    expect(streak.current).toBe(7);
+    expect(streak.awardedMilestones).toEqual(expect.arrayContaining([3, 7]));
+    const total = STREAK_MILESTONES.filter(m => m.days === 3 || m.days === 7).reduce((s, m) => s + m.xp, 0);
+    expect(storage.getXp()).toBe(xpBefore + total);
   });
 });

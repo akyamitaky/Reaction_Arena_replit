@@ -1,14 +1,8 @@
 import { useState, useEffect } from 'react';
 import { GameContext } from '@/components/GameShell';
+import { ARENA_COLORS } from '@/lib/palette';
 
-const COLORS = [
-  { name: 'Red', hex: '#EF4444' },
-  { name: 'Blue', hex: '#3B82F6' },
-  { name: 'Green', hex: '#22C55E' },
-  { name: 'Yellow', hex: '#EAB308' },
-  { name: 'Purple', hex: '#A855F7' },
-  { name: 'Orange', hex: '#F97316' },
-];
+const COLORS = ARENA_COLORS.slice(0, 6);
 
 function generate() {
   const word = COLORS[Math.floor(Math.random() * COLORS.length)];
@@ -19,8 +13,10 @@ function generate() {
   return { wordText: word.name, inkColor: ink, options: [...options].sort(() => Math.random() - 0.5) };
 }
 
+type Generated = ReturnType<typeof generate>;
+
 export default function StroopGame({ round, addScore, reportWrong, nextRound }: GameContext) {
-  const [q, setQ] = useState(() => generate());
+  const [q, setQ] = useState<Generated>(() => generate());
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,7 +36,7 @@ export default function StroopGame({ round, addScore, reportWrong, nextRound }: 
   return (
     <div className="flex flex-col items-center gap-8 w-full max-w-sm">
       <p className="text-xs text-muted-foreground">What COLOR is the text printed in?</p>
-      <p className="text-6xl font-black" style={{ color: q.inkColor.hex }}>
+      <p className="text-6xl font-black" style={{ color: q.inkColor.css }}>
         {q.wordText}
       </p>
       <div className="grid grid-cols-2 gap-3 w-full">

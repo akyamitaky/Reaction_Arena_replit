@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B111E"/>
+      <stop offset="1" stop-color="#111A2E"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#24B0DB"/>
+      <stop offset="0.55" stop-color="#33CDF0"/>
+      <stop offset="1" stop-color="#CE38FF"/>
+    </linearGradient>
+    <radialGradient id="glowC" cx="0.5" cy="0.5" r="0.5">
+      <stop stop-color="#24B0DB" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#24B0DB" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowV" cx="0.5" cy="0.5" r="0.5">
+      <stop stop-color="#CE38FF" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#CE38FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#24B0DB"/>
+      <stop offset="0.55" stop-color="#33CDF0"/>
+      <stop offset="1" stop-color="#CE38FF"/>
+    </linearGradient>
+    <g id="logoMark">
+      <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#mark)"/>
+      <circle cx="24" cy="24" r="19.5" stroke="rgba(255,255,255,0.9)" stroke-width="2.25" fill="none"/>
+      <circle cx="24" cy="24" r="14.5" fill="#0B1220"/>
+      <g fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 12 H24 A11.5 11.5 0 0 1 24 25 H13 Z"/>
+        <path d="M13 25 V35"/>
+        <path d="M15 26 L28 33 L23 33 L29 36"/>
+      </g>
+    </g>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="-120" y="-80" width="760" height="760" fill="url(#glowC)"/>
+  <rect x="560" y="40" width="760" height="760" fill="url(#glowV)"/>
+  <use href="#logoMark" transform="translate(488 64) scale(4.6667)"/>
+  <text x="600" y="400" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="96" fill="#FFFFFF">Reaction<tspan fill="#9F8BFF">Arena</tspan></text>
+  <text x="600" y="470" text-anchor="middle" font-family="Inter" font-weight="500" font-size="40" fill="#93A0B8">Train fast. Think sharper.</text>
+  <rect x="420" y="515" width="360" height="52" rx="26" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.14)" stroke-width="2"/>
+  <text x="600" y="549" text-anchor="middle" font-family="Inter" font-weight="600" font-size="26" fill="#C6CFE0">35 mini-games · Arenas · Challenges</text>
+</svg>

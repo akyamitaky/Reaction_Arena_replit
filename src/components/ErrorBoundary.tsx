@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
+import { logError } from '@/lib/errorLog';
 
 interface Props {
   children: ReactNode;
@@ -18,6 +19,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[ErrorBoundary]', error, info);
+    logError(error.message, info.componentStack || 'react-boundary');
   }
 
   private reset = () => {

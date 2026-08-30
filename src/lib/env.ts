@@ -3,6 +3,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   VITE_SUPABASE_URL: z.string().trim().url().optional(),
   VITE_SUPABASE_ANON_KEY: z.string().trim().min(1).optional(),
+  VITE_ANALYTICS_ENDPOINT: z.string().trim().url().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

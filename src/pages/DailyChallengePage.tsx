@@ -5,6 +5,7 @@ import { Flame, Zap, CalendarDays, Check, Trophy } from 'lucide-react';
 import { dailyGameId, getDailyStreak, utcDateKey } from '@/lib/dailyChallenge';
 import { getGameMode } from '@/lib/gameConfig';
 import CountUp from '@/components/CountUp';
+import DailyStreakCard from '@/components/DailyStreakCard';
 
 export default function DailyChallengePage() {
   const navigate = useNavigate();
@@ -71,6 +72,8 @@ export default function DailyChallengePage() {
           <h2 className="mt-4 font-display text-2xl font-bold tracking-tight">{mode.label}</h2>
           <p className="mx-auto mt-2 max-w-xs text-sm text-muted-foreground">{mode.description}</p>
         </div>
+
+        <DailyStreakCard />
 
         {streak.playedToday ? (
           <div className="space-y-3">

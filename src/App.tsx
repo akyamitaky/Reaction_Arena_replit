@@ -1,10 +1,12 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { Toaster } from '@/components/ui/sonner';
 import AchievementUnlockOverlay from '@/components/AchievementUnlockOverlay';
+import OnboardingOverlay from '@/components/OnboardingOverlay';
 import AppShell from '@/components/AppShell';
+import { track } from '@/lib/analytics';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const GameSelectPage = lazy(() => import('./pages/GameSelectPage'));
@@ -19,6 +21,7 @@ const DailyResultsPage = lazy(() => import('./pages/DailyResultsPage'));
 const JoinPage = lazy(() => import('./pages/JoinPage'));
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
 const ChallengePage = lazy(() => import('./pages/ChallengePage'));
+const StatsPage = lazy(() => import('./pages/StatsPage'));
 
 function PageFallback() {
   return (
@@ -30,6 +33,11 @@ function PageFallback() {
 
 function AnimatedRoutes() {
   const location = useLocation();
+
+  useEffect(() => {
+    track('page_view', { path: location.pathname });
+  }, [location.pathname]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -48,6 +56,7 @@ function AnimatedRoutes() {
             <Route path="/daily" element={<DailyChallengePage />} />
             <Route path="/daily-results" element={<DailyResultsPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/stats" element={<StatsPage />} />
             <Route path="/challenge/:code" element={<ChallengePage />} />
             <Route path="/join/:code" element={<JoinPage />} />
             <Route path="/arena-setup" element={<ArenaSetupPage />} />
@@ -63,12 +72,15 @@ function AnimatedRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppShell>
-        <AnimatedRoutes />
-      </AppShell>
-      <AchievementUnlockOverlay />
-      <Toaster />
-    </BrowserRouter>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <AppShell>
+          <AnimatedRoutes />
+        </AppShell>
+        <AchievementUnlockOverlay />
+        <OnboardingOverlay />
+        <Toaster />
+      </BrowserRouter>
+    </MotionConfig>
   );
 }

@@ -3,9 +3,7 @@ import { GameContext } from '@/components/GameShell';
 import { generateColorMixQuestion, MIX_COLORS, type ColorMixQuestion } from '@/lib/gameQuestions';
 
 function swatch(c: string, className: string) {
-  return (
-    <span className={className} style={{ backgroundColor: c === 'white' ? '#f8fafc' : MIX_COLORS[c] }} aria-label={c} />
-  );
+  return <span className={className} style={{ backgroundColor: MIX_COLORS[c] }} aria-label={c} />;
 }
 
 export default function ColorMixGame({ round, addScore, reportWrong, nextRound }: GameContext) {

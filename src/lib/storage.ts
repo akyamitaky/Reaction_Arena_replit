@@ -16,6 +16,8 @@ const KEYS = {
   weeklyXpWeek: 'ra-weekly-xp-week',
   runHistory: 'ra-run-history',
   maxCombo: 'ra-max-combo',
+  colorblind: 'ra-colorblind',
+  onboardingSeen: 'ra-onboarding-seen',
 } as const;
 
 const MAX_RUN_HISTORY = 100;
@@ -83,6 +85,10 @@ export const storage = {
     return stored === 'light' || stored === 'dark' ? stored : null;
   },
   setTheme: (theme: 'dark' | 'light') => localStorage.setItem(KEYS.theme, theme),
+  getColorblind: () => localStorage.getItem(KEYS.colorblind) === '1',
+  setColorblind: (on: boolean) => localStorage.setItem(KEYS.colorblind, on ? '1' : '0'),
+  getSeenOnboarding: () => localStorage.getItem(KEYS.onboardingSeen) === '1',
+  setSeenOnboarding: () => localStorage.setItem(KEYS.onboardingSeen, '1'),
   getXp: () => readNumber(KEYS.xp),
   getWeeklyXp: () => readNumber(KEYS.weeklyXp),
   getMaxCombo: () => readNumber(KEYS.maxCombo),

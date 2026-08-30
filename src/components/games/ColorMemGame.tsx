@@ -1,24 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameContext } from '@/components/GameShell';
+import { ARENA_COLORS, type ArenaColor } from '@/lib/palette';
 
-const COLORS = [
-  { name: 'Red', hex: '#EF4444' },
-  { name: 'Blue', hex: '#3B82F6' },
-  { name: 'Green', hex: '#22C55E' },
-  { name: 'Yellow', hex: '#EAB308' },
-  { name: 'Purple', hex: '#A855F7' },
-  { name: 'Orange', hex: '#F97316' },
-];
+const COLORS = ARENA_COLORS.slice(0, 6);
 
 export default function ColorMemGame({ round, addScore, reportWrong, nextRound }: GameContext) {
   const len = Math.min(3 + Math.floor((round - 1) / 2), 6);
-  const [sequence, setSequence] = useState<(typeof COLORS)[0][]>([]);
+  const [sequence, setSequence] = useState<ArenaColor[]>([]);
   const [phase, setPhase] = useState<'show' | 'pick' | 'done'>('show');
   const [activeIdx, setActiveIdx] = useState(-1);
   const [playerInput, setPlayerInput] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('');
 
-  const showSequence = useCallback((seq: (typeof COLORS)[0][]) => {
+  const showSequence = useCallback((seq: ArenaColor[]) => {
     setPhase('show');
     seq.forEach((_, i) => {
       setTimeout(() => setActiveIdx(i), i * 700);
@@ -71,7 +65,7 @@ export default function ColorMemGame({ round, addScore, reportWrong, nextRound }
               <div
                 key={i}
                 className={`w-14 h-14 rounded-xl transition-all ${activeIdx === i ? 'scale-110' : 'scale-75 opacity-30'}`}
-                style={{ backgroundColor: c.hex }}
+                style={{ backgroundColor: c.css }}
               />
             ))}
           </div>
@@ -88,7 +82,7 @@ export default function ColorMemGame({ round, addScore, reportWrong, nextRound }
                 key={c.name}
                 onClick={() => handlePick(c.name)}
                 className="w-16 h-16 rounded-xl hover:scale-110 transition-transform"
-                style={{ backgroundColor: c.hex }}
+                style={{ backgroundColor: c.css }}
               />
             ))}
           </div>

@@ -10,6 +10,7 @@ import { storage } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 import { play, playCorrect } from '@/lib/sound';
 import SoundToggle from '@/components/SoundToggle';
+import { track } from '@/lib/analytics';
 
 interface Props {
   mode: GameMode;
@@ -76,6 +77,12 @@ export default function GameShell({ mode, onComplete, arena, arenaProgress, chil
     if (!isArena) {
       storage.recordMaxCombo(maxComboRef.current);
     }
+    track('game_complete', {
+      gameId: mode.id,
+      score: scoreRef.current,
+      rounds: effectiveRounds,
+      arena: isArena ? 1 : 0,
+    });
     if (onComplete) {
       onComplete(scoreRef.current, timeTakenMs);
     } else {
@@ -151,7 +158,36 @@ export default function GameShell({ mode, onComplete, arena, arenaProgress, chil
     startTimeRef.current = Date.now();
     setStarted(true);
     play('start');
+    track('game_start', { gameId: mode.id, arena: isArena ? 1 : 0 });
   };
+
+  // Keyboard shortcuts: R restarts the current game, Esc leaves it.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return;
+
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        doneRef.current = false;
+        advanceLockRef.current = false;
+        startTimeRef.current = 0;
+        setScore(0);
+        setRound(1);
+        setTimeLeft(effectiveTime);
+        setCombo(0);
+        setMaxCombo(0);
+        setStarted(false);
+        play('start');
+      } else if (e.key === 'Escape' && !isArena && !arenaProgress) {
+        e.preventDefault();
+        navigate('/select');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [navigate, isArena, arenaProgress, effectiveTime]);
 
   if (!started) {
     return (
@@ -215,6 +251,10 @@ export default function GameShell({ mode, onComplete, arena, arenaProgress, chil
               </Button>
             )}
           </motion.div>
+          <p className="mt-4 text-[11px] text-muted-foreground">
+            Tip: press <kbd className="rounded border border-border/60 bg-card/60 px-1 font-mono">R</kbd> to restart ·{' '}
+            <kbd className="rounded border border-border/60 bg-card/60 px-1 font-mono">Esc</kbd> to exit
+          </p>
         </div>
       </div>
     );

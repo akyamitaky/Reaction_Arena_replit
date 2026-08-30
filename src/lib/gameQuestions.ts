@@ -163,15 +163,16 @@ export interface ColorMixQuestion {
 }
 
 export const MIX_COLORS: Record<string, string> = {
-  red: '#ef4444',
-  blue: '#3b82f6',
-  yellow: '#eab308',
-  green: '#22c55e',
-  purple: '#a855f7',
-  orange: '#f97316',
-  pink: '#ec4899',
-  gray: '#6b7280',
-  'light blue': '#38bdf8',
+  red: 'var(--c-red)',
+  blue: 'var(--c-blue)',
+  yellow: 'var(--c-yellow)',
+  green: 'var(--c-green)',
+  purple: 'var(--c-purple)',
+  orange: 'var(--c-orange)',
+  pink: 'var(--c-pink)',
+  gray: 'var(--c-gray)',
+  'light blue': 'var(--c-light-blue)',
+  white: 'var(--c-white)',
 };
 
 const MIXES: Array<[string, string, string]> = [

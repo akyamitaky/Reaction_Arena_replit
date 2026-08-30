@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import Logo from '@/components/Logo';
 import ThemeToggle from '@/components/ThemeToggle';
 import SoundToggle from '@/components/SoundToggle';
+import ColorblindToggle from '@/components/ColorblindToggle';
 
 const NAV_LINKS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -60,6 +61,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </nav>
 
             <div className="flex items-center gap-2">
+              <ColorblindToggle />
               <SoundToggle />
               <ThemeToggle />
             </div>

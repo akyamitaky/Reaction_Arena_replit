@@ -8,6 +8,7 @@
  */
 
 import { gameModes } from '@/lib/gameConfig';
+import { storage } from '@/lib/storage';
 
 const KEYS = {
   current: 'ra-daily-current',
@@ -15,7 +16,19 @@ const KEYS = {
   bestScore: 'ra-daily-best-score',
   lastDate: 'ra-daily-last-date',
   lastScore: 'ra-daily-last-score',
+  history: 'ra-daily-history',
+  milestones: 'ra-streak-milestones',
 } as const;
+
+/** Streak milestones that award a one-time bonus (distinct from achievements). */
+export const STREAK_MILESTONES: ReadonlyArray<{ days: number; xp: number; label: string }> = [
+  { days: 3, xp: 10, label: '3-day streak' },
+  { days: 7, xp: 25, label: '7-day streak' },
+  { days: 14, xp: 50, label: '14-day streak' },
+  { days: 30, xp: 100, label: '30-day streak' },
+];
+
+const MAX_HISTORY = 90;
 
 export function utcDateKey(d = new Date()): string {
   return d.toISOString().slice(0, 10);
@@ -48,11 +61,37 @@ export interface DailyStreak {
   lastDate: string;
   lastScore: number;
   bestScore: number;
+  /** Ascending list of UTC date keys the daily challenge was played on. */
+  history: string[];
+  /** Milestone day-counts already rewarded (see STREAK_MILESTONES). */
+  awardedMilestones: number[];
+  /** Milestone day-counts rewarded by the most recent recordDaily call. */
+  justAwarded: number[];
 }
 
 function readNum(key: string): number {
   const value = Number(localStorage.getItem(key) || 0);
   return Number.isFinite(value) ? value : 0;
+}
+
+function readHistory(): string[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEYS.history) || '[]');
+    if (!Array.isArray(raw)) return [];
+    const days = raw.filter((x): x is string => typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x)).sort();
+    return [...new Set(days)];
+  } catch {
+    return [];
+  }
+}
+
+function readAwardedMilestones(): number[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEYS.milestones) || '[]');
+    return Array.isArray(raw) ? raw.filter((x): x is number => typeof x === 'number') : [];
+  } catch {
+    return [];
+  }
 }
 
 export function getDailyStreak(dateKey = utcDateKey()): DailyStreak {
@@ -63,9 +102,16 @@ export function getDailyStreak(dateKey = utcDateKey()): DailyStreak {
     lastDate: localStorage.getItem(KEYS.lastDate) || '',
     lastScore: readNum(KEYS.lastScore),
     bestScore: readNum(KEYS.bestScore),
+    history: readHistory(),
+    awardedMilestones: readAwardedMilestones(),
+    justAwarded: [],
   };
 }
 
+/**
+ * Records a completed daily challenge. Returns the updated streak plus any
+ * milestone bonuses newly awarded (these are also banked as XP).
+ */
 export function recordDaily(score: number, dateKey = utcDateKey()): DailyStreak {
   const lastDate = localStorage.getItem(KEYS.lastDate);
   const current =
@@ -75,5 +121,25 @@ export function recordDaily(score: number, dateKey = utcDateKey()): DailyStreak 
   localStorage.setItem(KEYS.bestScore, String(Math.max(readNum(KEYS.bestScore), score)));
   localStorage.setItem(KEYS.lastDate, dateKey);
   localStorage.setItem(KEYS.lastScore, String(score));
-  return getDailyStreak(dateKey);
+
+  const history = readHistory();
+  if (!history.includes(dateKey)) {
+    history.push(dateKey);
+    localStorage.setItem(KEYS.history, JSON.stringify(history.slice(-MAX_HISTORY)));
+  }
+
+  const awarded = readAwardedMilestones();
+  const justAwarded: number[] = [];
+  for (const milestone of STREAK_MILESTONES) {
+    if (current === milestone.days && !awarded.includes(milestone.days)) {
+      awarded.push(milestone.days);
+      storage.addXp(milestone.xp);
+      justAwarded.push(milestone.days);
+    }
+  }
+  if (justAwarded.length > 0) {
+    localStorage.setItem(KEYS.milestones, JSON.stringify(awarded));
+  }
+
+  return { ...getDailyStreak(dateKey), justAwarded };
 }
